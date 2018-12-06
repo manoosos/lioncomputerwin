@@ -42,7 +42,7 @@ To slowly run the LionComputer:
 
 Then you could load the demo game 'Astro':
 
-- **File->Load BIN at Address** and choose the file type **'RBN' (relative BIN)**. Load the **astro.asm.rbn** at the decimal address **20000**.
+- **File->Load BIN at Address** and choose the file type **'RBN'** (relative BIN). Load the **astro.asm.rbn** at the decimal address **20000**.
 
 - After the load to memory and in the Lion Basic, type **RCODE20000** to run the Astro game code.
 
