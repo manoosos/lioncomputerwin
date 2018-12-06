@@ -22,7 +22,7 @@ Before the first solution run, make sure to
 
 - Uncheck, if not unchecked already, the DEBUG compiler constant for the two projects (the LionComputerEmulator class library and the LionWin frontend).
 
-- Make the LionWin frontend project, the StartUp Project.
+- Set the LionWin frontend project, as StartUp Project.
 
 
 To quickly run the LionComputer:
