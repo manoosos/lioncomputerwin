@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionComputerEmulator", "LionComputerEmulator\LionComputerEmulator.csproj", "{0C44DBB0-CF00-45D0-8FE7-EDA38C922BB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionWin", "LionWin\LionWin.csproj", "{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C44DBB0-CF00-45D0-8FE7-EDA38C922BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C44DBB0-CF00-45D0-8FE7-EDA38C922BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C44DBB0-CF00-45D0-8FE7-EDA38C922BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C44DBB0-CF00-45D0-8FE7-EDA38C922BB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
