@@ -4,15 +4,21 @@ LionComputerWin (or LionWin for short)
 A Windows emulator for the LionComputer.
 
 Code design: Manos Kantzos
+
 Essential Contribution: Theodoulos Liontakis, Ian Smirlis (thank you all!)
 
 The LionComputer is an FPGA based CPU-Computer, designed By Theodoulos Liontakis.
 
 LionComputer Project Page:
+
 http://users.sch.gr/tliontakis/index.php/my-projects/13-vhdl-cpu
 
 LionComputer Assembler:
+
 https://github.com/lliont/Lionasm
+
+
+
 
 
 Before the first solution setup-run, make sure to 
