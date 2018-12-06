@@ -21,7 +21,7 @@ https://github.com/lliont/Lionasm
 
 
 
-Before the first solution setup-run, make sure to 
+Before the first solution run, make sure to 
 
 Uncheck, if not unchecked already, the DEBUG compiler constant for the two projects (the LionComputerEmulator class library and the LionWin frontend).
 
