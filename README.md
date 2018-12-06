@@ -1,7 +1,8 @@
-LionComputerWin (or LionWin for short)
+LionComputerWin
 -------
+(or **LionWin** for short)
 
-A Windows emulator for the LionComputer.
+A Windows emulator for the LionComputer, in C#.
 
 Code design: **Manos Kantzos**
 
