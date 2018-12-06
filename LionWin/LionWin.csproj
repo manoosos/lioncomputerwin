@@ -7,8 +7,8 @@
     <ProjectGuid>{50B4732C-7789-4EE6-A9F1-8F086E2BE85F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestLionForms</RootNamespace>
-    <AssemblyName>TestLionForms</AssemblyName>
+    <RootNamespace>LionWin</RootNamespace>
+    <AssemblyName>LionWin</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -75,6 +75,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="files\astro.asm.rbn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
