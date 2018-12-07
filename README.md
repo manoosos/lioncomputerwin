@@ -41,7 +41,7 @@ To slowly run the LionComputer:
 - Press **[RUN]**. The system will run the Lion Basic and wait for commands.
 
 
-Then you could load the demo game 'Astro':
+Then you could load the demo game ['Astro'](https://www.youtube.com/watch?v=rEBGKEbPayw):
 
 - **File->Load BIN at Address** and choose the file type **'RBN'** (relative BIN). Load the **astro.asm.rbn** at the decimal address **20000**.
 
