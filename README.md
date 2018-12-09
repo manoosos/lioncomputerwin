@@ -25,14 +25,14 @@ Before the first solution run, make sure to
 - Set the LionWin frontend project, as StartUp Project.
 
 
-To quickly run the LionComputer:
+To run the LionComputer in one click:
 
 - Choose **File->Open BIN** and select the **system.bin**. This will load a snapshot of the latest system of the computer. 
 
 - Press the **[RUN]** button. The system will run the Lion Basic and wait for commands.
 
 
-To slowly run the LionComputer:
+To normally run the LionComputer:
 
 - First you should **File->Load BIN** the **lionrom.asm.bin**.
 
@@ -41,16 +41,16 @@ To slowly run the LionComputer:
 - Press **[RUN]**. The system will run the Lion Basic and wait for commands.
 
 
-Then you could load the demo game ['Astro'](https://www.youtube.com/watch?v=rEBGKEbPayw):
+Then you could load the demo game [**'Astro'**](https://www.youtube.com/watch?v=rEBGKEbPayw):
 
 - **File->Load BIN at Address** and choose the file type **'RBN'** (relative BIN). Load the **astro.asm.rbn** at the decimal address **20000**.
 
-- After the load to memory and in the Lion Basic, type **RCODE20000** to run the Astro game code.
+- After the load to memory and in the Lion Basic, type **RCODE20000** to run the **Astro** game code.
 
 - Use the Windows Keyboard Arrows as a joystick, the Control key as a fire button and enjoy the game!
 
 
-The LionWin emulator, at the moment, does not emulate the hardware SPI and the FAT file system, therefore the Lion Basic commands LOAD, SAVE, DIR, DELETE, LCODE, SCODE do nothing. The file i/o is done at the frontend though, at the 'File' menu.
+The LionWin emulator does not emulate the hardware SPI and the FAT file system at the moment, so the Lion Basic commands LOAD, SAVE, DIR, DELETE, LCODE, SCODE do nothing. The file i/o is done at the frontend though, at the 'File' menu.
 
 
 This is not a complete manual and more updates should be done!
