@@ -18,6 +18,10 @@ LionComputer Assembler:
 
 https://github.com/lliont/Lionasm
 
+LionWin uses the NAudio library:
+
+https://github.com/naudio/NAudio
+
 Before the first solution run, make sure to 
 
 - Uncheck, if not unchecked already, the DEBUG compiler constant for the two projects (the LionComputerEmulator class library and the LionWin frontend).
