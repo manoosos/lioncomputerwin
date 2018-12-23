@@ -156,13 +156,6 @@ namespace LionComputerEmulator
 
             byte colfg = 0;
 
-            vblCounter++;
-            lock (copylock)
-            {
-                Memory.Data[Cpu.COUNTER] = (byte)(vblCounter >> 8);
-                Memory.Data[Cpu.COUNTER + 1] = (byte)(vblCounter);
-            }
-
             while (tileColorIndex < 1984)
             {
                 colfg = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] >> 3);
@@ -413,6 +406,9 @@ namespace LionComputerEmulator
                 BitmapData bmpdata = screenBitMap.LockBits(new Rectangle(0, 0, Width << 1, Height << 1), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
                 Marshal.Copy(screenBytes, 0, bmpdata.Scan0, screenBytes.Length);
                 screenBitMap.UnlockBits(bmpdata);
+                vblCounter++;
+                Memory.Data[Cpu.COUNTER] = (byte)(vblCounter >> 8);
+                Memory.Data[Cpu.COUNTER + 1] = (byte)(vblCounter);
                 return screenBitMap;
             }
         }
