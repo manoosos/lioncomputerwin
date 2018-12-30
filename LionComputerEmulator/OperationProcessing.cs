@@ -3799,6 +3799,160 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
+        /// Inc/Dec Ax, Jump on Not Zero X and Decrement, to Register Value
+        /// </summary>
+        public static void JxaRegDir(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Jump on Not Zero X and Decrement, to Immediate Value
+        /// </summary>
+        public static void JxaImd(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Jump on Not Zero X and Decrement, to Register Reference
+        /// </summary>
+        public static void JxaRegRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Jump on Not Zero X and Decrement, to Memory
+        /// </summary>
+        public static void JxaMemRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
         /// Jump on Above or Equal to Register Value
         /// </summary>
         public static void JaeRegDir(Operation operation)
@@ -6509,6 +6663,160 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
+                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Relative Jump on Not Zero X and Decrement, to Register Value
+        /// </summary>
+        public static void JrxaRegDir(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Relative Jump on Not Zero X and Decrement, to Immediate Value
+        /// </summary>
+        public static void JrxaImd(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Relative Jump on Not Zero X and Decrement, to Register Reference
+        /// </summary>
+        public static void JrxaRegRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
+                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
+            }
+            else
+            {
+                //WaitForCycles(operation.Cycles);
+                State.PC += operation.Length;
+            }
+            State.X--;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+        }
+
+        /// <summary>
+        /// Inc/Dec Ax, Relative Jump on Not Zero X and Decrement, to Memory
+        /// </summary>
+        public static void JrxaMemRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            if (State.X != 0)
+            {
+                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                ushort dstval = State.A[dstndx];
+                if ((operation.OpCodeValue & bwb) == 0)
+                    if ((State.SR & State.D) == 0)
+                        dstval += 2;
+                    else
+                        dstval -= 2;
+                else
+                    if ((State.SR & State.D) == 0)
+                        dstval += 1;
+                    else
+                        dstval -= 1;
+                State.A[dstndx] = dstval;
                 int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
             }

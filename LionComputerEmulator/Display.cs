@@ -20,21 +20,36 @@ using System.ComponentModel;
  * 16words (16x16)
  * bank 2: 64064 FA40
  * 
+ * multi color sprites:
+ * 11 sprites
+ * 
+ * sprite data: 16384 4000
+ * 8bytes x 16 lines
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
  */
 
 namespace LionComputerEmulator
 {
     public static class Display
     {
-        private static Bitmap screenBitMap = new Bitmap(Width << 1, Height << 1, PixelFormat.Format8bppIndexed);
+        private static Bitmap screenBitMap = new Bitmap(Width << 1, Height0 << 1, PixelFormat.Format8bppIndexed);
         private static ColorPalette screenPalette = screenBitMap.Palette;
-        private static byte[] screenBytes = new byte[Width * 2 * Height * 2]; // 8 bpp space x2 size
+        private static byte[] screenBytes = new byte[(Width << 1) * (Height0 << 1)]; // 8 bpp space x2 size
         private static byte[] spriteColorBytes = new byte[32 << 5]; // 8 bpp space x2 size
-        private static byte[] spriteMaskBytes = new byte[32 << 5]; // 8 bpp space x2 size
+        private static byte[] spriteMaskBytes = new byte[32 << 5];  // 8 bpp space x2 size
+        private static byte[] borderZeroBmp = new byte[borderZeroBmpBytesNum];
         public static BackgroundWorker SpritePortWorker = new BackgroundWorker();
-        private static byte[] scrCols = new byte[129];
+        public static BackgroundWorker VideoModePortWorker = new BackgroundWorker();
+        private static byte[] scrCols0 = new byte[129];
+        private static byte[] scrCols1 = new byte[4];
         // sprite colors and mask values
         private static byte[] sprMaskVals = new byte[] { 0x0ff, 0 };
+        private static byte[] sprMaskValsMode1 = new byte[] { 0, 0x0ff };
         private static byte[] sprColVals = new byte[2];
         // sprite to screen line blocks
         private static byte[] sprPixelBytes = new byte[16];
@@ -44,31 +59,55 @@ namespace LionComputerEmulator
         private static ulong[] spriteBitBlock = new ulong[4];
         private static ulong[] maskBitBlock = new ulong[4];
         private static ulong[] rasterOpBitBlock = new ulong[4];
-        // updated from sprite port worker
-        private static int spriteBank = 0;
+
+        private static int spriteBank = 0; // updated from sprite port worker
+        private static int videoMode = 0;  // updated from videomode port worker
+
         private static uint vblCounter = 0;
         private static int __vblCounterHigh = 0;
         private static int __vblCounterLow = 0;
 
-        /// <summary>
-        /// Sprite Parameters Bank 1
-        /// </summary>
-        public const int SPRITE_PARAMS_1 = 0x0f6b0;
+        private const int borderZeroBmpBytesNum = (Width << 1) * (Height0 - Height1);
 
         /// <summary>
-        /// Sprite Parameters Bank 2
+        /// Mode 0 Sprite Parameters Bank 1
         /// </summary>
-        public const int SPRITE_PARAMS_2 = SPRITE_PARAMS_1 + 128;
+        public const int SPRITE_PARAMS_0_1 = 0x0f6b0;
 
         /// <summary>
-        /// Sprite Data Bank 1 at address 63552
+        /// Mode 0 Sprite Parameters Bank 2
         /// </summary>
-        public const int SPRITE_DATA_1 = 0x0f840;
+        public const int SPRITE_PARAMS_0_2 = SPRITE_PARAMS_0_1 + 128;
 
         /// <summary>
-        /// Sprite Data Bank 2 at address 64064
+        /// Mode 0 Sprite Data Bank 1 at address 63552
         /// </summary>
-        public const int SPRITE_DATA_2 = SPRITE_DATA_1 + 512;
+        public const int SPRITE_DATA_0_1 = 0x0f840;
+
+        /// <summary>
+        /// Mode 0 Sprite Data Bank 2 at address 64064
+        /// </summary>
+        public const int SPRITE_DATA_0_2 = SPRITE_DATA_0_1 + 512;
+
+        /// <summary>
+        /// Mode 1 Sprite Parameters Bank 1
+        /// </summary>
+        public const int SPRITE_PARAMS_1_1 = 16384;
+
+        /// <summary>
+        /// Mode 1 Sprite Parameters Bank 2
+        /// </summary>
+        public const int SPRITE_PARAMS_1_2 = SPRITE_PARAMS_1_1 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Data Bank 1
+        /// </summary>
+        public const int SPRITE_DATA_1_1 = SPRITE_PARAMS_1_2 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Data Bank 2
+        /// </summary>
+        public const int SPRITE_DATA_1_2 = SPRITE_PARAMS_1_1 + 4352;
 
         // offsets in sprite parameters
         public const int SPRITE_X = 0;       // word
@@ -81,28 +120,40 @@ namespace LionComputerEmulator
         private const int SPRITES_NUM = 11;
 
         /// <summary>
-        /// Start of VIDEO RAM Address
+        /// Start of VIDEO RAM Address Mode 0
         /// </summary>
-        public const int VIDEO_RAM_START = 0x0c000;
+        public const int VIDEO_RAM_START_MODE0 = 0x0c000;
 
         /// <summary>
-        /// End of VIDEO RAM Address
+        /// End of VIDEO RAM Address Mode 0
         /// </summary>
-        public const int VIDEO_RAM_END = VIDEO_RAM_START + (Width * Height) / 8;
+        public const int VIDEO_RAM_END_MODE0 = VIDEO_RAM_START_MODE0 + (Width * Height0) / 8;
+
+        /// <summary>
+        /// Start of VIDEO RAM Address Mode 1
+        /// </summary>
+        public const int VIDEO_RAM_START_MODE1 = 0x08000;
+
+        /// <summary>
+        /// End of VIDEO RAM Address Mode 1
+        /// </summary>
+        public const int VIDEO_RAM_END_MODE1 = VIDEO_RAM_START_MODE1 + 32000;
 
         /// <summary>
         /// Start of Video Color Lookup Table constant
         /// </summary>
-        public const int VIDEO_CLUT_START = VIDEO_RAM_START + 0x02ee0;
+        public const int VIDEO_CLUT_START = VIDEO_RAM_START_MODE0 + 0x02ee0;
 
         /// <summary>
         /// End of Video Color Lookup Table constant
         /// </summary>
         public const int VIDEO_CLUT_END = VIDEO_CLUT_START + 0x07c0;
 
-        public const int Width = 384;
+        public const int Width = 320;
 
-        public const int Height = 248;
+        public const int Height0 = 240; // mode0 pixels height
+
+        public const int Height1 = 200; // mode1 pixels height
 
         public const int CharWidth = 6;
 
@@ -110,29 +161,12 @@ namespace LionComputerEmulator
 
         public const int CharXDimension = Width / CharWidth;
 
-        public const int CharYDimension = Height / CharHeight;
+        public const int CharYDimension = Height0 / CharHeight;
 
         /// <summary>
         /// Memory Data Byte Array
         /// </summary>
         public static byte[] Ram = new byte[0x010000];
-
-        public static void InitScreen()
-        {
-            // poke the palette
-            screenPalette.Entries[0] = Color.FromArgb(0, 0, 0);
-            screenPalette.Entries[1] = Color.FromArgb(0, 0, 255);
-            screenPalette.Entries[2] = Color.FromArgb(0, 255, 0);
-            screenPalette.Entries[3] = Color.FromArgb(0, 255, 255);
-            screenPalette.Entries[4] = Color.FromArgb(255, 0, 0);
-            screenPalette.Entries[5] = Color.FromArgb(255, 0, 255);
-            screenPalette.Entries[6] = Color.FromArgb(255, 255, 0);
-            screenPalette.Entries[7] = Color.FromArgb(255, 255, 255);
-            screenBitMap.Palette = screenPalette;
-            SpritePortWorker.DoWork += SpritePortWork;
-            __vblCounterHigh = Cpu.COUNTER;
-            __vblCounterLow = Cpu.COUNTER + 1;
-        }
 
         // argument passed from the device port access
         private static void SpritePortWork(object sender, DoWorkEventArgs e)
@@ -141,269 +175,471 @@ namespace LionComputerEmulator
                 spriteBank = Convert.ToInt32(e.Argument);
         }
 
+        // argument passed from the videomode port access
+        private static void VideoModePortWork(object sender, DoWorkEventArgs e)
+        {
+            lock (copylock)
+            {
+                videoMode = Convert.ToInt32(e.Argument);
+                switch (videoMode)
+                {
+                    case 0:
+                        // poke the palette for mode0
+                        screenPalette.Entries[0] = Color.FromArgb(0, 0, 0);
+                        screenPalette.Entries[1] = Color.FromArgb(0, 0, 255);
+                        screenPalette.Entries[2] = Color.FromArgb(0, 255, 0);
+                        screenPalette.Entries[3] = Color.FromArgb(0, 255, 255);
+                        screenPalette.Entries[4] = Color.FromArgb(255, 0, 0);
+                        screenPalette.Entries[5] = Color.FromArgb(255, 0, 255);
+                        screenPalette.Entries[6] = Color.FromArgb(255, 255, 0);
+                        screenPalette.Entries[7] = Color.FromArgb(255, 255, 255);
+                        break;
+
+                    case 1:
+                        // poke the low palette (half intensity) for mode1
+                        screenPalette.Entries[0] = Color.FromArgb(0, 0, 0);
+                        screenPalette.Entries[1] = Color.FromArgb(0, 0, 200);
+                        screenPalette.Entries[2] = Color.FromArgb(0, 200, 0);
+                        screenPalette.Entries[3] = Color.FromArgb(0, 200, 200);
+                        screenPalette.Entries[4] = Color.FromArgb(200, 0, 0);
+                        screenPalette.Entries[5] = Color.FromArgb(200, 0, 200);
+                        screenPalette.Entries[6] = Color.FromArgb(160, 160, 0);
+                        screenPalette.Entries[7] = Color.FromArgb(200, 200, 200);
+                        // clear rest mode0 lines of bitmap
+                        Buffer.BlockCopy(borderZeroBmp, 0, screenBytes, 0, borderZeroBmpBytesNum);
+                        Buffer.BlockCopy(borderZeroBmp, 0, screenBytes, (Width << 1) * ((Height1 << 1) + (Height0 - Height1)), borderZeroBmpBytesNum);
+                        break;
+                }
+            }
+        }
+
+        public static void InitScreen()
+        {
+            // poke the palette for mode0 to start showing
+            screenPalette.Entries[0] = Color.FromArgb(0, 0, 0);
+            screenPalette.Entries[1] = Color.FromArgb(0, 0, 255);
+            screenPalette.Entries[2] = Color.FromArgb(0, 255, 0);
+            screenPalette.Entries[3] = Color.FromArgb(0, 255, 255);
+            screenPalette.Entries[4] = Color.FromArgb(255, 0, 0);
+            screenPalette.Entries[5] = Color.FromArgb(255, 0, 255);
+            screenPalette.Entries[6] = Color.FromArgb(255, 255, 0);
+            screenPalette.Entries[7] = Color.FromArgb(255, 255, 255);
+
+            // poke the high palette for mode1
+            screenPalette.Entries[8] = Color.FromArgb(0, 0, 0);
+            screenPalette.Entries[9] = Color.FromArgb(0, 0, 255);
+            screenPalette.Entries[10] = Color.FromArgb(0, 255, 0);
+            screenPalette.Entries[11] = Color.FromArgb(0, 255, 255);
+            screenPalette.Entries[12] = Color.FromArgb(255, 0, 0);
+            screenPalette.Entries[13] = Color.FromArgb(255, 0, 255);
+            screenPalette.Entries[14] = Color.FromArgb(255, 255, 0);
+            screenPalette.Entries[15] = Color.FromArgb(255, 255, 255);
+
+            SpritePortWorker.DoWork += SpritePortWork;
+            VideoModePortWorker.DoWork += VideoModePortWork;
+            __vblCounterHigh = Cpu.COUNTER;
+            __vblCounterLow = Cpu.COUNTER + 1;
+        }
+
         public static Bitmap Screen()
         {
-            int tileOffsetVram = VIDEO_RAM_START;
-            int columnOffsetBmp = 0;
-            int tileColorIndex = 0;
-
-            byte vRamTileValue1 = 0;
-            byte vRamTileValue2 = 0;
-            byte vRamTileValue3 = 0;
-            byte vRamTileValue4 = 0;
-            byte vRamTileValue5 = 0;
-            byte vRamTileValue6 = 0;
-
-            byte colfg = 0;
-
-            while (tileColorIndex < 1984)
+            screenBitMap.Palette = screenPalette;
+            switch (videoMode)
             {
-                colfg = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] >> 3);
-                scrCols[0] = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] & 0x07);
-                scrCols[1] = colfg;
-                scrCols[2] = colfg;
-                scrCols[4] = colfg;
-                scrCols[8] = colfg;
-                scrCols[0x010] = colfg;
-                scrCols[0x020] = colfg;
-                scrCols[0x040] = colfg;
-                scrCols[0x080] = colfg;
+                case 1:
+                    int scrBytesNdx = borderZeroBmpBytesNum;
+                    for (int _vrambytendx = VIDEO_RAM_START_MODE1; _vrambytendx < VIDEO_RAM_END_MODE1; _vrambytendx++)
+                    {
+                        byte dualPixelValue = Ram[_vrambytendx];
+                        scrCols0[0] = (byte)(dualPixelValue >> 4);
+                        scrCols0[2] = (byte)(dualPixelValue & 0x0f);
+                        scrCols0[1] = scrCols0[0];
+                        scrCols0[3] = scrCols0[2];
+                        Buffer.BlockCopy(scrCols0, 0, screenBytes, scrBytesNdx, 4);
+                        Buffer.BlockCopy(scrCols0, 0, screenBytes, scrBytesNdx + 640, 4);
+                        scrBytesNdx += 4;
+                        if (scrBytesNdx % 640 == 0)
+                            scrBytesNdx += 640;
+                    }
+                    break;
 
-                vRamTileValue1 = Ram[tileOffsetVram];
-                vRamTileValue2 = Ram[tileOffsetVram + 1];
-                vRamTileValue3 = Ram[tileOffsetVram + 2];
-                vRamTileValue4 = Ram[tileOffsetVram + 3];
-                vRamTileValue5 = Ram[tileOffsetVram + 4];
-                vRamTileValue6 = Ram[tileOffsetVram + 5];
+                default:
+                    int tileOffsetVram = VIDEO_RAM_START_MODE0;
+                    int columnOffsetBmp = 0;
+                    int tileScreenIndex = 0;
+                    int tileColorIndex = 0;
 
-                screenBytes[columnOffsetBmp] = scrCols[vRamTileValue1 & 0x080];
-                screenBytes[columnOffsetBmp + 1] = scrCols[vRamTileValue1 & 0x080];
-                screenBytes[columnOffsetBmp + 2] = scrCols[vRamTileValue2 & 0x080];
-                screenBytes[columnOffsetBmp + 3] = scrCols[vRamTileValue2 & 0x080];
-                screenBytes[columnOffsetBmp + 4] = scrCols[vRamTileValue3 & 0x080];
-                screenBytes[columnOffsetBmp + 5] = scrCols[vRamTileValue3 & 0x080];
-                screenBytes[columnOffsetBmp + 6] = scrCols[vRamTileValue4 & 0x080];
-                screenBytes[columnOffsetBmp + 7] = scrCols[vRamTileValue4 & 0x080];
-                screenBytes[columnOffsetBmp + 8] = scrCols[vRamTileValue5 & 0x080];
-                screenBytes[columnOffsetBmp + 9] = scrCols[vRamTileValue5 & 0x080];
-                screenBytes[columnOffsetBmp + 10] = scrCols[vRamTileValue6 & 0x080];
-                screenBytes[columnOffsetBmp + 11] = scrCols[vRamTileValue6 & 0x080];
+                    byte vRamTileValue1 = 0;
+                    byte vRamTileValue2 = 0;
+                    byte vRamTileValue3 = 0;
+                    byte vRamTileValue4 = 0;
+                    byte vRamTileValue5 = 0;
+                    byte vRamTileValue6 = 0;
 
-                screenBytes[columnOffsetBmp + 768] = scrCols[vRamTileValue1 & 0x080];
-                screenBytes[columnOffsetBmp + 769] = scrCols[vRamTileValue1 & 0x080];
-                screenBytes[columnOffsetBmp + 770] = scrCols[vRamTileValue2 & 0x080];
-                screenBytes[columnOffsetBmp + 771] = scrCols[vRamTileValue2 & 0x080];
-                screenBytes[columnOffsetBmp + 772] = scrCols[vRamTileValue3 & 0x080];
-                screenBytes[columnOffsetBmp + 773] = scrCols[vRamTileValue3 & 0x080];
-                screenBytes[columnOffsetBmp + 774] = scrCols[vRamTileValue4 & 0x080];
-                screenBytes[columnOffsetBmp + 775] = scrCols[vRamTileValue4 & 0x080];
-                screenBytes[columnOffsetBmp + 776] = scrCols[vRamTileValue5 & 0x080];
-                screenBytes[columnOffsetBmp + 777] = scrCols[vRamTileValue5 & 0x080];
-                screenBytes[columnOffsetBmp + 778] = scrCols[vRamTileValue6 & 0x080];
-                screenBytes[columnOffsetBmp + 779] = scrCols[vRamTileValue6 & 0x080];
+                    byte colfg = 0;
 
-                screenBytes[columnOffsetBmp + 1536] = scrCols[vRamTileValue1 & 0x040];
-                screenBytes[columnOffsetBmp + 1537] = scrCols[vRamTileValue1 & 0x040];
-                screenBytes[columnOffsetBmp + 1538] = scrCols[vRamTileValue2 & 0x040];
-                screenBytes[columnOffsetBmp + 1539] = scrCols[vRamTileValue2 & 0x040];
-                screenBytes[columnOffsetBmp + 1540] = scrCols[vRamTileValue3 & 0x040];
-                screenBytes[columnOffsetBmp + 1541] = scrCols[vRamTileValue3 & 0x040];
-                screenBytes[columnOffsetBmp + 1542] = scrCols[vRamTileValue4 & 0x040];
-                screenBytes[columnOffsetBmp + 1543] = scrCols[vRamTileValue4 & 0x040];
-                screenBytes[columnOffsetBmp + 1544] = scrCols[vRamTileValue5 & 0x040];
-                screenBytes[columnOffsetBmp + 1545] = scrCols[vRamTileValue5 & 0x040];
-                screenBytes[columnOffsetBmp + 1546] = scrCols[vRamTileValue6 & 0x040];
-                screenBytes[columnOffsetBmp + 1547] = scrCols[vRamTileValue6 & 0x040];
+                    while (tileScreenIndex < CharXDimension * CharYDimension)
+                    {
+                        colfg = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] >> 3);
+                        scrCols0[0] = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] & 0x07);
+                        scrCols0[1] = colfg;
+                        scrCols0[2] = colfg;
+                        scrCols0[4] = colfg;
+                        scrCols0[8] = colfg;
+                        scrCols0[0x010] = colfg;
+                        scrCols0[0x020] = colfg;
+                        scrCols0[0x040] = colfg;
+                        scrCols0[0x080] = colfg;
 
-                screenBytes[columnOffsetBmp + 2304] = scrCols[vRamTileValue1 & 0x040];
-                screenBytes[columnOffsetBmp + 2305] = scrCols[vRamTileValue1 & 0x040];
-                screenBytes[columnOffsetBmp + 2306] = scrCols[vRamTileValue2 & 0x040];
-                screenBytes[columnOffsetBmp + 2307] = scrCols[vRamTileValue2 & 0x040];
-                screenBytes[columnOffsetBmp + 2308] = scrCols[vRamTileValue3 & 0x040];
-                screenBytes[columnOffsetBmp + 2309] = scrCols[vRamTileValue3 & 0x040];
-                screenBytes[columnOffsetBmp + 2310] = scrCols[vRamTileValue4 & 0x040];
-                screenBytes[columnOffsetBmp + 2311] = scrCols[vRamTileValue4 & 0x040];
-                screenBytes[columnOffsetBmp + 2312] = scrCols[vRamTileValue5 & 0x040];
-                screenBytes[columnOffsetBmp + 2313] = scrCols[vRamTileValue5 & 0x040];
-                screenBytes[columnOffsetBmp + 2314] = scrCols[vRamTileValue6 & 0x040];
-                screenBytes[columnOffsetBmp + 2315] = scrCols[vRamTileValue6 & 0x040];
+                        vRamTileValue1 = Ram[tileOffsetVram];
+                        vRamTileValue2 = Ram[tileOffsetVram + 1];
+                        vRamTileValue3 = Ram[tileOffsetVram + 2];
+                        vRamTileValue4 = Ram[tileOffsetVram + 3];
+                        vRamTileValue5 = Ram[tileOffsetVram + 4];
+                        vRamTileValue6 = Ram[tileOffsetVram + 5];
 
-                screenBytes[columnOffsetBmp + 3072] = scrCols[vRamTileValue1 & 0x020];
-                screenBytes[columnOffsetBmp + 3073] = scrCols[vRamTileValue1 & 0x020];
-                screenBytes[columnOffsetBmp + 3074] = scrCols[vRamTileValue2 & 0x020];
-                screenBytes[columnOffsetBmp + 3075] = scrCols[vRamTileValue2 & 0x020];
-                screenBytes[columnOffsetBmp + 3076] = scrCols[vRamTileValue3 & 0x020];
-                screenBytes[columnOffsetBmp + 3077] = scrCols[vRamTileValue3 & 0x020];
-                screenBytes[columnOffsetBmp + 3078] = scrCols[vRamTileValue4 & 0x020];
-                screenBytes[columnOffsetBmp + 3079] = scrCols[vRamTileValue4 & 0x020];
-                screenBytes[columnOffsetBmp + 3080] = scrCols[vRamTileValue5 & 0x020];
-                screenBytes[columnOffsetBmp + 3081] = scrCols[vRamTileValue5 & 0x020];
-                screenBytes[columnOffsetBmp + 3082] = scrCols[vRamTileValue6 & 0x020];
-                screenBytes[columnOffsetBmp + 3083] = scrCols[vRamTileValue6 & 0x020];
+                        screenBytes[columnOffsetBmp] = scrCols0[vRamTileValue1 & 0x080];
+                        screenBytes[columnOffsetBmp + 1] = scrCols0[vRamTileValue1 & 0x080];
+                        screenBytes[columnOffsetBmp + 2] = scrCols0[vRamTileValue2 & 0x080];
+                        screenBytes[columnOffsetBmp + 3] = scrCols0[vRamTileValue2 & 0x080];
+                        screenBytes[columnOffsetBmp + 4] = scrCols0[vRamTileValue3 & 0x080];
+                        screenBytes[columnOffsetBmp + 5] = scrCols0[vRamTileValue3 & 0x080];
+                        screenBytes[columnOffsetBmp + 6] = scrCols0[vRamTileValue4 & 0x080];
+                        screenBytes[columnOffsetBmp + 7] = scrCols0[vRamTileValue4 & 0x080];
+                        screenBytes[columnOffsetBmp + 8] = scrCols0[vRamTileValue5 & 0x080];
+                        screenBytes[columnOffsetBmp + 9] = scrCols0[vRamTileValue5 & 0x080];
+                        screenBytes[columnOffsetBmp + 10] = scrCols0[vRamTileValue6 & 0x080];
+                        screenBytes[columnOffsetBmp + 11] = scrCols0[vRamTileValue6 & 0x080];
 
-                screenBytes[columnOffsetBmp + 3840] = scrCols[vRamTileValue1 & 0x020];
-                screenBytes[columnOffsetBmp + 3841] = scrCols[vRamTileValue1 & 0x020];
-                screenBytes[columnOffsetBmp + 3842] = scrCols[vRamTileValue2 & 0x020];
-                screenBytes[columnOffsetBmp + 3843] = scrCols[vRamTileValue2 & 0x020];
-                screenBytes[columnOffsetBmp + 3844] = scrCols[vRamTileValue3 & 0x020];
-                screenBytes[columnOffsetBmp + 3845] = scrCols[vRamTileValue3 & 0x020];
-                screenBytes[columnOffsetBmp + 3846] = scrCols[vRamTileValue4 & 0x020];
-                screenBytes[columnOffsetBmp + 3847] = scrCols[vRamTileValue4 & 0x020];
-                screenBytes[columnOffsetBmp + 3848] = scrCols[vRamTileValue5 & 0x020];
-                screenBytes[columnOffsetBmp + 3849] = scrCols[vRamTileValue5 & 0x020];
-                screenBytes[columnOffsetBmp + 3850] = scrCols[vRamTileValue6 & 0x020];
-                screenBytes[columnOffsetBmp + 3851] = scrCols[vRamTileValue6 & 0x020];
+                        screenBytes[columnOffsetBmp + 640] = scrCols0[vRamTileValue1 & 0x080];
+                        screenBytes[columnOffsetBmp + 641] = scrCols0[vRamTileValue1 & 0x080];
+                        screenBytes[columnOffsetBmp + 642] = scrCols0[vRamTileValue2 & 0x080];
+                        screenBytes[columnOffsetBmp + 643] = scrCols0[vRamTileValue2 & 0x080];
+                        screenBytes[columnOffsetBmp + 644] = scrCols0[vRamTileValue3 & 0x080];
+                        screenBytes[columnOffsetBmp + 645] = scrCols0[vRamTileValue3 & 0x080];
+                        screenBytes[columnOffsetBmp + 646] = scrCols0[vRamTileValue4 & 0x080];
+                        screenBytes[columnOffsetBmp + 647] = scrCols0[vRamTileValue4 & 0x080];
+                        screenBytes[columnOffsetBmp + 648] = scrCols0[vRamTileValue5 & 0x080];
+                        screenBytes[columnOffsetBmp + 649] = scrCols0[vRamTileValue5 & 0x080];
+                        screenBytes[columnOffsetBmp + 650] = scrCols0[vRamTileValue6 & 0x080];
+                        screenBytes[columnOffsetBmp + 651] = scrCols0[vRamTileValue6 & 0x080];
 
-                screenBytes[columnOffsetBmp + 4608] = scrCols[vRamTileValue1 & 0x010];
-                screenBytes[columnOffsetBmp + 4609] = scrCols[vRamTileValue1 & 0x010];
-                screenBytes[columnOffsetBmp + 4610] = scrCols[vRamTileValue2 & 0x010];
-                screenBytes[columnOffsetBmp + 4611] = scrCols[vRamTileValue2 & 0x010];
-                screenBytes[columnOffsetBmp + 4612] = scrCols[vRamTileValue3 & 0x010];
-                screenBytes[columnOffsetBmp + 4613] = scrCols[vRamTileValue3 & 0x010];
-                screenBytes[columnOffsetBmp + 4614] = scrCols[vRamTileValue4 & 0x010];
-                screenBytes[columnOffsetBmp + 4615] = scrCols[vRamTileValue4 & 0x010];
-                screenBytes[columnOffsetBmp + 4616] = scrCols[vRamTileValue5 & 0x010];
-                screenBytes[columnOffsetBmp + 4617] = scrCols[vRamTileValue5 & 0x010];
-                screenBytes[columnOffsetBmp + 4618] = scrCols[vRamTileValue6 & 0x010];
-                screenBytes[columnOffsetBmp + 4619] = scrCols[vRamTileValue6 & 0x010];
+                        screenBytes[columnOffsetBmp + 1280] = scrCols0[vRamTileValue1 & 0x040];
+                        screenBytes[columnOffsetBmp + 1281] = scrCols0[vRamTileValue1 & 0x040];
+                        screenBytes[columnOffsetBmp + 1282] = scrCols0[vRamTileValue2 & 0x040];
+                        screenBytes[columnOffsetBmp + 1283] = scrCols0[vRamTileValue2 & 0x040];
+                        screenBytes[columnOffsetBmp + 1284] = scrCols0[vRamTileValue3 & 0x040];
+                        screenBytes[columnOffsetBmp + 1285] = scrCols0[vRamTileValue3 & 0x040];
+                        screenBytes[columnOffsetBmp + 1286] = scrCols0[vRamTileValue4 & 0x040];
+                        screenBytes[columnOffsetBmp + 1287] = scrCols0[vRamTileValue4 & 0x040];
+                        screenBytes[columnOffsetBmp + 1288] = scrCols0[vRamTileValue5 & 0x040];
+                        screenBytes[columnOffsetBmp + 1289] = scrCols0[vRamTileValue5 & 0x040];
+                        screenBytes[columnOffsetBmp + 1290] = scrCols0[vRamTileValue6 & 0x040];
+                        screenBytes[columnOffsetBmp + 1291] = scrCols0[vRamTileValue6 & 0x040];
 
-                screenBytes[columnOffsetBmp + 5376] = scrCols[vRamTileValue1 & 0x010];
-                screenBytes[columnOffsetBmp + 5377] = scrCols[vRamTileValue1 & 0x010];
-                screenBytes[columnOffsetBmp + 5378] = scrCols[vRamTileValue2 & 0x010];
-                screenBytes[columnOffsetBmp + 5379] = scrCols[vRamTileValue2 & 0x010];
-                screenBytes[columnOffsetBmp + 5380] = scrCols[vRamTileValue3 & 0x010];
-                screenBytes[columnOffsetBmp + 5381] = scrCols[vRamTileValue3 & 0x010];
-                screenBytes[columnOffsetBmp + 5382] = scrCols[vRamTileValue4 & 0x010];
-                screenBytes[columnOffsetBmp + 5383] = scrCols[vRamTileValue4 & 0x010];
-                screenBytes[columnOffsetBmp + 5384] = scrCols[vRamTileValue5 & 0x010];
-                screenBytes[columnOffsetBmp + 5385] = scrCols[vRamTileValue5 & 0x010];
-                screenBytes[columnOffsetBmp + 5386] = scrCols[vRamTileValue6 & 0x010];
-                screenBytes[columnOffsetBmp + 5387] = scrCols[vRamTileValue6 & 0x010];
+                        screenBytes[columnOffsetBmp + 1920] = scrCols0[vRamTileValue1 & 0x040];
+                        screenBytes[columnOffsetBmp + 1921] = scrCols0[vRamTileValue1 & 0x040];
+                        screenBytes[columnOffsetBmp + 1922] = scrCols0[vRamTileValue2 & 0x040];
+                        screenBytes[columnOffsetBmp + 1923] = scrCols0[vRamTileValue2 & 0x040];
+                        screenBytes[columnOffsetBmp + 1924] = scrCols0[vRamTileValue3 & 0x040];
+                        screenBytes[columnOffsetBmp + 1925] = scrCols0[vRamTileValue3 & 0x040];
+                        screenBytes[columnOffsetBmp + 1926] = scrCols0[vRamTileValue4 & 0x040];
+                        screenBytes[columnOffsetBmp + 1927] = scrCols0[vRamTileValue4 & 0x040];
+                        screenBytes[columnOffsetBmp + 1928] = scrCols0[vRamTileValue5 & 0x040];
+                        screenBytes[columnOffsetBmp + 1929] = scrCols0[vRamTileValue5 & 0x040];
+                        screenBytes[columnOffsetBmp + 1930] = scrCols0[vRamTileValue6 & 0x040];
+                        screenBytes[columnOffsetBmp + 1931] = scrCols0[vRamTileValue6 & 0x040];
 
-                screenBytes[columnOffsetBmp + 6144] = scrCols[vRamTileValue1 & 0x08];
-                screenBytes[columnOffsetBmp + 6145] = scrCols[vRamTileValue1 & 0x08];
-                screenBytes[columnOffsetBmp + 6146] = scrCols[vRamTileValue2 & 0x08];
-                screenBytes[columnOffsetBmp + 6147] = scrCols[vRamTileValue2 & 0x08];
-                screenBytes[columnOffsetBmp + 6148] = scrCols[vRamTileValue3 & 0x08];
-                screenBytes[columnOffsetBmp + 6149] = scrCols[vRamTileValue3 & 0x08];
-                screenBytes[columnOffsetBmp + 6150] = scrCols[vRamTileValue4 & 0x08];
-                screenBytes[columnOffsetBmp + 6151] = scrCols[vRamTileValue4 & 0x08];
-                screenBytes[columnOffsetBmp + 6152] = scrCols[vRamTileValue5 & 0x08];
-                screenBytes[columnOffsetBmp + 6153] = scrCols[vRamTileValue5 & 0x08];
-                screenBytes[columnOffsetBmp + 6154] = scrCols[vRamTileValue6 & 0x08];
-                screenBytes[columnOffsetBmp + 6155] = scrCols[vRamTileValue6 & 0x08];
+                        screenBytes[columnOffsetBmp + 2560] = scrCols0[vRamTileValue1 & 0x020];
+                        screenBytes[columnOffsetBmp + 2561] = scrCols0[vRamTileValue1 & 0x020];
+                        screenBytes[columnOffsetBmp + 2562] = scrCols0[vRamTileValue2 & 0x020];
+                        screenBytes[columnOffsetBmp + 2563] = scrCols0[vRamTileValue2 & 0x020];
+                        screenBytes[columnOffsetBmp + 2564] = scrCols0[vRamTileValue3 & 0x020];
+                        screenBytes[columnOffsetBmp + 2565] = scrCols0[vRamTileValue3 & 0x020];
+                        screenBytes[columnOffsetBmp + 2566] = scrCols0[vRamTileValue4 & 0x020];
+                        screenBytes[columnOffsetBmp + 2567] = scrCols0[vRamTileValue4 & 0x020];
+                        screenBytes[columnOffsetBmp + 2568] = scrCols0[vRamTileValue5 & 0x020];
+                        screenBytes[columnOffsetBmp + 2569] = scrCols0[vRamTileValue5 & 0x020];
+                        screenBytes[columnOffsetBmp + 2570] = scrCols0[vRamTileValue6 & 0x020];
+                        screenBytes[columnOffsetBmp + 2571] = scrCols0[vRamTileValue6 & 0x020];
 
-                screenBytes[columnOffsetBmp + 6912] = scrCols[vRamTileValue1 & 0x08];
-                screenBytes[columnOffsetBmp + 6913] = scrCols[vRamTileValue1 & 0x08];
-                screenBytes[columnOffsetBmp + 6914] = scrCols[vRamTileValue2 & 0x08];
-                screenBytes[columnOffsetBmp + 6915] = scrCols[vRamTileValue2 & 0x08];
-                screenBytes[columnOffsetBmp + 6916] = scrCols[vRamTileValue3 & 0x08];
-                screenBytes[columnOffsetBmp + 6917] = scrCols[vRamTileValue3 & 0x08];
-                screenBytes[columnOffsetBmp + 6918] = scrCols[vRamTileValue4 & 0x08];
-                screenBytes[columnOffsetBmp + 6919] = scrCols[vRamTileValue4 & 0x08];
-                screenBytes[columnOffsetBmp + 6920] = scrCols[vRamTileValue5 & 0x08];
-                screenBytes[columnOffsetBmp + 6921] = scrCols[vRamTileValue5 & 0x08];
-                screenBytes[columnOffsetBmp + 6922] = scrCols[vRamTileValue6 & 0x08];
-                screenBytes[columnOffsetBmp + 6923] = scrCols[vRamTileValue6 & 0x08];
+                        screenBytes[columnOffsetBmp + 3200] = scrCols0[vRamTileValue1 & 0x020];
+                        screenBytes[columnOffsetBmp + 3201] = scrCols0[vRamTileValue1 & 0x020];
+                        screenBytes[columnOffsetBmp + 3202] = scrCols0[vRamTileValue2 & 0x020];
+                        screenBytes[columnOffsetBmp + 3203] = scrCols0[vRamTileValue2 & 0x020];
+                        screenBytes[columnOffsetBmp + 3204] = scrCols0[vRamTileValue3 & 0x020];
+                        screenBytes[columnOffsetBmp + 3205] = scrCols0[vRamTileValue3 & 0x020];
+                        screenBytes[columnOffsetBmp + 3206] = scrCols0[vRamTileValue4 & 0x020];
+                        screenBytes[columnOffsetBmp + 3207] = scrCols0[vRamTileValue4 & 0x020];
+                        screenBytes[columnOffsetBmp + 3208] = scrCols0[vRamTileValue5 & 0x020];
+                        screenBytes[columnOffsetBmp + 3209] = scrCols0[vRamTileValue5 & 0x020];
+                        screenBytes[columnOffsetBmp + 3210] = scrCols0[vRamTileValue6 & 0x020];
+                        screenBytes[columnOffsetBmp + 3211] = scrCols0[vRamTileValue6 & 0x020];
 
-                screenBytes[columnOffsetBmp + 7680] = scrCols[vRamTileValue1 & 0x04];
-                screenBytes[columnOffsetBmp + 7681] = scrCols[vRamTileValue1 & 0x04];
-                screenBytes[columnOffsetBmp + 7682] = scrCols[vRamTileValue2 & 0x04];
-                screenBytes[columnOffsetBmp + 7683] = scrCols[vRamTileValue2 & 0x04];
-                screenBytes[columnOffsetBmp + 7684] = scrCols[vRamTileValue3 & 0x04];
-                screenBytes[columnOffsetBmp + 7685] = scrCols[vRamTileValue3 & 0x04];
-                screenBytes[columnOffsetBmp + 7686] = scrCols[vRamTileValue4 & 0x04];
-                screenBytes[columnOffsetBmp + 7687] = scrCols[vRamTileValue4 & 0x04];
-                screenBytes[columnOffsetBmp + 7688] = scrCols[vRamTileValue5 & 0x04];
-                screenBytes[columnOffsetBmp + 7689] = scrCols[vRamTileValue5 & 0x04];
-                screenBytes[columnOffsetBmp + 7690] = scrCols[vRamTileValue6 & 0x04];
-                screenBytes[columnOffsetBmp + 7691] = scrCols[vRamTileValue6 & 0x04];
+                        screenBytes[columnOffsetBmp + 3840] = scrCols0[vRamTileValue1 & 0x010];
+                        screenBytes[columnOffsetBmp + 3841] = scrCols0[vRamTileValue1 & 0x010];
+                        screenBytes[columnOffsetBmp + 3842] = scrCols0[vRamTileValue2 & 0x010];
+                        screenBytes[columnOffsetBmp + 3843] = scrCols0[vRamTileValue2 & 0x010];
+                        screenBytes[columnOffsetBmp + 3844] = scrCols0[vRamTileValue3 & 0x010];
+                        screenBytes[columnOffsetBmp + 3845] = scrCols0[vRamTileValue3 & 0x010];
+                        screenBytes[columnOffsetBmp + 3846] = scrCols0[vRamTileValue4 & 0x010];
+                        screenBytes[columnOffsetBmp + 3847] = scrCols0[vRamTileValue4 & 0x010];
+                        screenBytes[columnOffsetBmp + 3848] = scrCols0[vRamTileValue5 & 0x010];
+                        screenBytes[columnOffsetBmp + 3849] = scrCols0[vRamTileValue5 & 0x010];
+                        screenBytes[columnOffsetBmp + 3850] = scrCols0[vRamTileValue6 & 0x010];
+                        screenBytes[columnOffsetBmp + 3851] = scrCols0[vRamTileValue6 & 0x010];
 
-                screenBytes[columnOffsetBmp + 8448] = scrCols[vRamTileValue1 & 0x04];
-                screenBytes[columnOffsetBmp + 8449] = scrCols[vRamTileValue1 & 0x04];
-                screenBytes[columnOffsetBmp + 8450] = scrCols[vRamTileValue2 & 0x04];
-                screenBytes[columnOffsetBmp + 8451] = scrCols[vRamTileValue2 & 0x04];
-                screenBytes[columnOffsetBmp + 8452] = scrCols[vRamTileValue3 & 0x04];
-                screenBytes[columnOffsetBmp + 8453] = scrCols[vRamTileValue3 & 0x04];
-                screenBytes[columnOffsetBmp + 8454] = scrCols[vRamTileValue4 & 0x04];
-                screenBytes[columnOffsetBmp + 8455] = scrCols[vRamTileValue4 & 0x04];
-                screenBytes[columnOffsetBmp + 8456] = scrCols[vRamTileValue5 & 0x04];
-                screenBytes[columnOffsetBmp + 8457] = scrCols[vRamTileValue5 & 0x04];
-                screenBytes[columnOffsetBmp + 8458] = scrCols[vRamTileValue6 & 0x04];
-                screenBytes[columnOffsetBmp + 8459] = scrCols[vRamTileValue6 & 0x04];
+                        screenBytes[columnOffsetBmp + 4480] = scrCols0[vRamTileValue1 & 0x010];
+                        screenBytes[columnOffsetBmp + 4481] = scrCols0[vRamTileValue1 & 0x010];
+                        screenBytes[columnOffsetBmp + 4482] = scrCols0[vRamTileValue2 & 0x010];
+                        screenBytes[columnOffsetBmp + 4483] = scrCols0[vRamTileValue2 & 0x010];
+                        screenBytes[columnOffsetBmp + 4484] = scrCols0[vRamTileValue3 & 0x010];
+                        screenBytes[columnOffsetBmp + 4485] = scrCols0[vRamTileValue3 & 0x010];
+                        screenBytes[columnOffsetBmp + 4486] = scrCols0[vRamTileValue4 & 0x010];
+                        screenBytes[columnOffsetBmp + 4487] = scrCols0[vRamTileValue4 & 0x010];
+                        screenBytes[columnOffsetBmp + 4488] = scrCols0[vRamTileValue5 & 0x010];
+                        screenBytes[columnOffsetBmp + 4489] = scrCols0[vRamTileValue5 & 0x010];
+                        screenBytes[columnOffsetBmp + 4490] = scrCols0[vRamTileValue6 & 0x010];
+                        screenBytes[columnOffsetBmp + 4491] = scrCols0[vRamTileValue6 & 0x010];
 
-                screenBytes[columnOffsetBmp + 9216] = scrCols[vRamTileValue1 & 0x02];
-                screenBytes[columnOffsetBmp + 9217] = scrCols[vRamTileValue1 & 0x02];
-                screenBytes[columnOffsetBmp + 9218] = scrCols[vRamTileValue2 & 0x02];
-                screenBytes[columnOffsetBmp + 9219] = scrCols[vRamTileValue2 & 0x02];
-                screenBytes[columnOffsetBmp + 9220] = scrCols[vRamTileValue3 & 0x02];
-                screenBytes[columnOffsetBmp + 9221] = scrCols[vRamTileValue3 & 0x02];
-                screenBytes[columnOffsetBmp + 9222] = scrCols[vRamTileValue4 & 0x02];
-                screenBytes[columnOffsetBmp + 9223] = scrCols[vRamTileValue4 & 0x02];
-                screenBytes[columnOffsetBmp + 9224] = scrCols[vRamTileValue5 & 0x02];
-                screenBytes[columnOffsetBmp + 9225] = scrCols[vRamTileValue5 & 0x02];
-                screenBytes[columnOffsetBmp + 9226] = scrCols[vRamTileValue6 & 0x02];
-                screenBytes[columnOffsetBmp + 9227] = scrCols[vRamTileValue6 & 0x02];
+                        screenBytes[columnOffsetBmp + 5120] = scrCols0[vRamTileValue1 & 8];
+                        screenBytes[columnOffsetBmp + 5121] = scrCols0[vRamTileValue1 & 8];
+                        screenBytes[columnOffsetBmp + 5122] = scrCols0[vRamTileValue2 & 8];
+                        screenBytes[columnOffsetBmp + 5123] = scrCols0[vRamTileValue2 & 8];
+                        screenBytes[columnOffsetBmp + 5124] = scrCols0[vRamTileValue3 & 8];
+                        screenBytes[columnOffsetBmp + 5125] = scrCols0[vRamTileValue3 & 8];
+                        screenBytes[columnOffsetBmp + 5126] = scrCols0[vRamTileValue4 & 8];
+                        screenBytes[columnOffsetBmp + 5127] = scrCols0[vRamTileValue4 & 8];
+                        screenBytes[columnOffsetBmp + 5128] = scrCols0[vRamTileValue5 & 8];
+                        screenBytes[columnOffsetBmp + 5129] = scrCols0[vRamTileValue5 & 8];
+                        screenBytes[columnOffsetBmp + 5130] = scrCols0[vRamTileValue6 & 8];
+                        screenBytes[columnOffsetBmp + 5131] = scrCols0[vRamTileValue6 & 8];
 
-                screenBytes[columnOffsetBmp + 9984] = scrCols[vRamTileValue1 & 0x02];
-                screenBytes[columnOffsetBmp + 9985] = scrCols[vRamTileValue1 & 0x02];
-                screenBytes[columnOffsetBmp + 9986] = scrCols[vRamTileValue2 & 0x02];
-                screenBytes[columnOffsetBmp + 9987] = scrCols[vRamTileValue2 & 0x02];
-                screenBytes[columnOffsetBmp + 9988] = scrCols[vRamTileValue3 & 0x02];
-                screenBytes[columnOffsetBmp + 9989] = scrCols[vRamTileValue3 & 0x02];
-                screenBytes[columnOffsetBmp + 9990] = scrCols[vRamTileValue4 & 0x02];
-                screenBytes[columnOffsetBmp + 9991] = scrCols[vRamTileValue4 & 0x02];
-                screenBytes[columnOffsetBmp + 9992] = scrCols[vRamTileValue5 & 0x02];
-                screenBytes[columnOffsetBmp + 9993] = scrCols[vRamTileValue5 & 0x02];
-                screenBytes[columnOffsetBmp + 9994] = scrCols[vRamTileValue6 & 0x02];
-                screenBytes[columnOffsetBmp + 9995] = scrCols[vRamTileValue6 & 0x02];
+                        screenBytes[columnOffsetBmp + 5760] = scrCols0[vRamTileValue1 & 8];
+                        screenBytes[columnOffsetBmp + 5761] = scrCols0[vRamTileValue1 & 8];
+                        screenBytes[columnOffsetBmp + 5762] = scrCols0[vRamTileValue2 & 8];
+                        screenBytes[columnOffsetBmp + 5763] = scrCols0[vRamTileValue2 & 8];
+                        screenBytes[columnOffsetBmp + 5764] = scrCols0[vRamTileValue3 & 8];
+                        screenBytes[columnOffsetBmp + 5765] = scrCols0[vRamTileValue3 & 8];
+                        screenBytes[columnOffsetBmp + 5766] = scrCols0[vRamTileValue4 & 8];
+                        screenBytes[columnOffsetBmp + 5767] = scrCols0[vRamTileValue4 & 8];
+                        screenBytes[columnOffsetBmp + 5768] = scrCols0[vRamTileValue5 & 8];
+                        screenBytes[columnOffsetBmp + 5769] = scrCols0[vRamTileValue5 & 8];
+                        screenBytes[columnOffsetBmp + 5770] = scrCols0[vRamTileValue6 & 8];
+                        screenBytes[columnOffsetBmp + 5771] = scrCols0[vRamTileValue6 & 8];
 
-                screenBytes[columnOffsetBmp + 10752] = scrCols[vRamTileValue1 & 0x01];
-                screenBytes[columnOffsetBmp + 10753] = scrCols[vRamTileValue1 & 0x01];
-                screenBytes[columnOffsetBmp + 10754] = scrCols[vRamTileValue2 & 0x01];
-                screenBytes[columnOffsetBmp + 10755] = scrCols[vRamTileValue2 & 0x01];
-                screenBytes[columnOffsetBmp + 10756] = scrCols[vRamTileValue3 & 0x01];
-                screenBytes[columnOffsetBmp + 10757] = scrCols[vRamTileValue3 & 0x01];
-                screenBytes[columnOffsetBmp + 10758] = scrCols[vRamTileValue4 & 0x01];
-                screenBytes[columnOffsetBmp + 10759] = scrCols[vRamTileValue4 & 0x01];
-                screenBytes[columnOffsetBmp + 10760] = scrCols[vRamTileValue5 & 0x01];
-                screenBytes[columnOffsetBmp + 10761] = scrCols[vRamTileValue5 & 0x01];
-                screenBytes[columnOffsetBmp + 10762] = scrCols[vRamTileValue6 & 0x01];
-                screenBytes[columnOffsetBmp + 10763] = scrCols[vRamTileValue6 & 0x01];
+                        screenBytes[columnOffsetBmp + 6400] = scrCols0[vRamTileValue1 & 4];
+                        screenBytes[columnOffsetBmp + 6401] = scrCols0[vRamTileValue1 & 4];
+                        screenBytes[columnOffsetBmp + 6402] = scrCols0[vRamTileValue2 & 4];
+                        screenBytes[columnOffsetBmp + 6403] = scrCols0[vRamTileValue2 & 4];
+                        screenBytes[columnOffsetBmp + 6404] = scrCols0[vRamTileValue3 & 4];
+                        screenBytes[columnOffsetBmp + 6405] = scrCols0[vRamTileValue3 & 4];
+                        screenBytes[columnOffsetBmp + 6406] = scrCols0[vRamTileValue4 & 4];
+                        screenBytes[columnOffsetBmp + 6407] = scrCols0[vRamTileValue4 & 4];
+                        screenBytes[columnOffsetBmp + 6408] = scrCols0[vRamTileValue5 & 4];
+                        screenBytes[columnOffsetBmp + 6409] = scrCols0[vRamTileValue5 & 4];
+                        screenBytes[columnOffsetBmp + 6410] = scrCols0[vRamTileValue6 & 4];
+                        screenBytes[columnOffsetBmp + 6411] = scrCols0[vRamTileValue6 & 4];
 
-                screenBytes[columnOffsetBmp + 11520] = scrCols[vRamTileValue1 & 0x01];
-                screenBytes[columnOffsetBmp + 11521] = scrCols[vRamTileValue1 & 0x01];
-                screenBytes[columnOffsetBmp + 11522] = scrCols[vRamTileValue2 & 0x01];
-                screenBytes[columnOffsetBmp + 11523] = scrCols[vRamTileValue2 & 0x01];
-                screenBytes[columnOffsetBmp + 11524] = scrCols[vRamTileValue3 & 0x01];
-                screenBytes[columnOffsetBmp + 11525] = scrCols[vRamTileValue3 & 0x01];
-                screenBytes[columnOffsetBmp + 11526] = scrCols[vRamTileValue4 & 0x01];
-                screenBytes[columnOffsetBmp + 11527] = scrCols[vRamTileValue4 & 0x01];
-                screenBytes[columnOffsetBmp + 11528] = scrCols[vRamTileValue5 & 0x01];
-                screenBytes[columnOffsetBmp + 11529] = scrCols[vRamTileValue5 & 0x01];
-                screenBytes[columnOffsetBmp + 11530] = scrCols[vRamTileValue6 & 0x01];
-                screenBytes[columnOffsetBmp + 11531] = scrCols[vRamTileValue6 & 0x01];
+                        screenBytes[columnOffsetBmp + 7040] = scrCols0[vRamTileValue1 & 4];
+                        screenBytes[columnOffsetBmp + 7041] = scrCols0[vRamTileValue1 & 4];
+                        screenBytes[columnOffsetBmp + 7042] = scrCols0[vRamTileValue2 & 4];
+                        screenBytes[columnOffsetBmp + 7043] = scrCols0[vRamTileValue2 & 4];
+                        screenBytes[columnOffsetBmp + 7044] = scrCols0[vRamTileValue3 & 4];
+                        screenBytes[columnOffsetBmp + 7045] = scrCols0[vRamTileValue3 & 4];
+                        screenBytes[columnOffsetBmp + 7046] = scrCols0[vRamTileValue4 & 4];
+                        screenBytes[columnOffsetBmp + 7047] = scrCols0[vRamTileValue4 & 4];
+                        screenBytes[columnOffsetBmp + 7048] = scrCols0[vRamTileValue5 & 4];
+                        screenBytes[columnOffsetBmp + 7049] = scrCols0[vRamTileValue5 & 4];
+                        screenBytes[columnOffsetBmp + 7050] = scrCols0[vRamTileValue6 & 4];
+                        screenBytes[columnOffsetBmp + 7051] = scrCols0[vRamTileValue6 & 4];
 
-                tileColorIndex++;
-                tileOffsetVram += CharWidth;
-                columnOffsetBmp += 12;
-                if ((tileColorIndex & 0x03f) == 0)
-                {
-                    columnOffsetBmp = (tileColorIndex >> 6) * 12288;
-                }
+                        screenBytes[columnOffsetBmp + 7680] = scrCols0[vRamTileValue1 & 2];
+                        screenBytes[columnOffsetBmp + 7681] = scrCols0[vRamTileValue1 & 2];
+                        screenBytes[columnOffsetBmp + 7682] = scrCols0[vRamTileValue2 & 2];
+                        screenBytes[columnOffsetBmp + 7683] = scrCols0[vRamTileValue2 & 2];
+                        screenBytes[columnOffsetBmp + 7684] = scrCols0[vRamTileValue3 & 2];
+                        screenBytes[columnOffsetBmp + 7685] = scrCols0[vRamTileValue3 & 2];
+                        screenBytes[columnOffsetBmp + 7686] = scrCols0[vRamTileValue4 & 2];
+                        screenBytes[columnOffsetBmp + 7687] = scrCols0[vRamTileValue4 & 2];
+                        screenBytes[columnOffsetBmp + 7688] = scrCols0[vRamTileValue5 & 2];
+                        screenBytes[columnOffsetBmp + 7689] = scrCols0[vRamTileValue5 & 2];
+                        screenBytes[columnOffsetBmp + 7690] = scrCols0[vRamTileValue6 & 2];
+                        screenBytes[columnOffsetBmp + 7691] = scrCols0[vRamTileValue6 & 2];
+
+                        screenBytes[columnOffsetBmp + 8320] = scrCols0[vRamTileValue1 & 2];
+                        screenBytes[columnOffsetBmp + 8321] = scrCols0[vRamTileValue1 & 2];
+                        screenBytes[columnOffsetBmp + 8322] = scrCols0[vRamTileValue2 & 2];
+                        screenBytes[columnOffsetBmp + 8323] = scrCols0[vRamTileValue2 & 2];
+                        screenBytes[columnOffsetBmp + 8324] = scrCols0[vRamTileValue3 & 2];
+                        screenBytes[columnOffsetBmp + 8325] = scrCols0[vRamTileValue3 & 2];
+                        screenBytes[columnOffsetBmp + 8326] = scrCols0[vRamTileValue4 & 2];
+                        screenBytes[columnOffsetBmp + 8327] = scrCols0[vRamTileValue4 & 2];
+                        screenBytes[columnOffsetBmp + 8328] = scrCols0[vRamTileValue5 & 2];
+                        screenBytes[columnOffsetBmp + 8329] = scrCols0[vRamTileValue5 & 2];
+                        screenBytes[columnOffsetBmp + 8330] = scrCols0[vRamTileValue6 & 2];
+                        screenBytes[columnOffsetBmp + 8331] = scrCols0[vRamTileValue6 & 2];
+
+                        screenBytes[columnOffsetBmp + 8960] = scrCols0[vRamTileValue1 & 1];
+                        screenBytes[columnOffsetBmp + 8961] = scrCols0[vRamTileValue1 & 1];
+                        screenBytes[columnOffsetBmp + 8962] = scrCols0[vRamTileValue2 & 1];
+                        screenBytes[columnOffsetBmp + 8963] = scrCols0[vRamTileValue2 & 1];
+                        screenBytes[columnOffsetBmp + 8964] = scrCols0[vRamTileValue3 & 1];
+                        screenBytes[columnOffsetBmp + 8965] = scrCols0[vRamTileValue3 & 1];
+                        screenBytes[columnOffsetBmp + 8966] = scrCols0[vRamTileValue4 & 1];
+                        screenBytes[columnOffsetBmp + 8967] = scrCols0[vRamTileValue4 & 1];
+                        screenBytes[columnOffsetBmp + 8968] = scrCols0[vRamTileValue5 & 1];
+                        screenBytes[columnOffsetBmp + 8969] = scrCols0[vRamTileValue5 & 1];
+                        screenBytes[columnOffsetBmp + 8970] = scrCols0[vRamTileValue6 & 1];
+                        screenBytes[columnOffsetBmp + 8971] = scrCols0[vRamTileValue6 & 1];
+
+                        screenBytes[columnOffsetBmp + 9600] = scrCols0[vRamTileValue1 & 1];
+                        screenBytes[columnOffsetBmp + 9601] = scrCols0[vRamTileValue1 & 1];
+                        screenBytes[columnOffsetBmp + 9602] = scrCols0[vRamTileValue2 & 1];
+                        screenBytes[columnOffsetBmp + 9603] = scrCols0[vRamTileValue2 & 1];
+                        screenBytes[columnOffsetBmp + 9604] = scrCols0[vRamTileValue3 & 1];
+                        screenBytes[columnOffsetBmp + 9605] = scrCols0[vRamTileValue3 & 1];
+                        screenBytes[columnOffsetBmp + 9606] = scrCols0[vRamTileValue4 & 1];
+                        screenBytes[columnOffsetBmp + 9607] = scrCols0[vRamTileValue4 & 1];
+                        screenBytes[columnOffsetBmp + 9608] = scrCols0[vRamTileValue5 & 1];
+                        screenBytes[columnOffsetBmp + 9609] = scrCols0[vRamTileValue5 & 1];
+                        screenBytes[columnOffsetBmp + 9610] = scrCols0[vRamTileValue6 & 1];
+                        screenBytes[columnOffsetBmp + 9611] = scrCols0[vRamTileValue6 & 1];
+
+                        tileScreenIndex++;
+                        tileColorIndex++;
+                        tileOffsetVram += CharWidth;
+                        columnOffsetBmp += 12;
+                        if ((tileScreenIndex % 53) == 0)
+                        {
+                            colfg = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] >> 3);
+                            scrCols0[0] = (byte)(Ram[VIDEO_CLUT_START + tileColorIndex] & 0x07);
+                            scrCols0[1] = colfg;
+                            scrCols0[2] = colfg;
+                            scrCols0[4] = colfg;
+                            scrCols0[8] = colfg;
+                            scrCols0[0x010] = colfg;
+                            scrCols0[0x020] = colfg;
+                            scrCols0[0x040] = colfg;
+                            scrCols0[0x080] = colfg;
+
+                            vRamTileValue1 = Ram[tileOffsetVram];
+                            vRamTileValue2 = Ram[tileOffsetVram + 1];
+
+                            screenBytes[columnOffsetBmp] = scrCols0[vRamTileValue1 & 0x080];
+                            screenBytes[columnOffsetBmp + 1] = scrCols0[vRamTileValue1 & 0x080];
+                            screenBytes[columnOffsetBmp + 2] = scrCols0[vRamTileValue2 & 0x080];
+                            screenBytes[columnOffsetBmp + 3] = scrCols0[vRamTileValue2 & 0x080];
+
+                            screenBytes[columnOffsetBmp + 640] = scrCols0[vRamTileValue1 & 0x080];
+                            screenBytes[columnOffsetBmp + 641] = scrCols0[vRamTileValue1 & 0x080];
+                            screenBytes[columnOffsetBmp + 642] = scrCols0[vRamTileValue2 & 0x080];
+                            screenBytes[columnOffsetBmp + 643] = scrCols0[vRamTileValue2 & 0x080];
+
+                            screenBytes[columnOffsetBmp + 1280] = scrCols0[vRamTileValue1 & 0x040];
+                            screenBytes[columnOffsetBmp + 1281] = scrCols0[vRamTileValue1 & 0x040];
+                            screenBytes[columnOffsetBmp + 1282] = scrCols0[vRamTileValue2 & 0x040];
+                            screenBytes[columnOffsetBmp + 1283] = scrCols0[vRamTileValue2 & 0x040];
+
+                            screenBytes[columnOffsetBmp + 1920] = scrCols0[vRamTileValue1 & 0x040];
+                            screenBytes[columnOffsetBmp + 1921] = scrCols0[vRamTileValue1 & 0x040];
+                            screenBytes[columnOffsetBmp + 1922] = scrCols0[vRamTileValue2 & 0x040];
+                            screenBytes[columnOffsetBmp + 1923] = scrCols0[vRamTileValue2 & 0x040];
+
+                            screenBytes[columnOffsetBmp + 2560] = scrCols0[vRamTileValue1 & 0x020];
+                            screenBytes[columnOffsetBmp + 2561] = scrCols0[vRamTileValue1 & 0x020];
+                            screenBytes[columnOffsetBmp + 2562] = scrCols0[vRamTileValue2 & 0x020];
+                            screenBytes[columnOffsetBmp + 2563] = scrCols0[vRamTileValue2 & 0x020];
+
+                            screenBytes[columnOffsetBmp + 3200] = scrCols0[vRamTileValue1 & 0x020];
+                            screenBytes[columnOffsetBmp + 3201] = scrCols0[vRamTileValue1 & 0x020];
+                            screenBytes[columnOffsetBmp + 3202] = scrCols0[vRamTileValue2 & 0x020];
+                            screenBytes[columnOffsetBmp + 3203] = scrCols0[vRamTileValue2 & 0x020];
+
+                            screenBytes[columnOffsetBmp + 3840] = scrCols0[vRamTileValue1 & 0x010];
+                            screenBytes[columnOffsetBmp + 3841] = scrCols0[vRamTileValue1 & 0x010];
+                            screenBytes[columnOffsetBmp + 3842] = scrCols0[vRamTileValue2 & 0x010];
+                            screenBytes[columnOffsetBmp + 3843] = scrCols0[vRamTileValue2 & 0x010];
+
+                            screenBytes[columnOffsetBmp + 4480] = scrCols0[vRamTileValue1 & 0x010];
+                            screenBytes[columnOffsetBmp + 4481] = scrCols0[vRamTileValue1 & 0x010];
+                            screenBytes[columnOffsetBmp + 4482] = scrCols0[vRamTileValue2 & 0x010];
+                            screenBytes[columnOffsetBmp + 4483] = scrCols0[vRamTileValue2 & 0x010];
+
+                            screenBytes[columnOffsetBmp + 5120] = scrCols0[vRamTileValue1 & 8];
+                            screenBytes[columnOffsetBmp + 5121] = scrCols0[vRamTileValue1 & 8];
+                            screenBytes[columnOffsetBmp + 5122] = scrCols0[vRamTileValue2 & 8];
+                            screenBytes[columnOffsetBmp + 5123] = scrCols0[vRamTileValue2 & 8];
+
+                            screenBytes[columnOffsetBmp + 5760] = scrCols0[vRamTileValue1 & 8];
+                            screenBytes[columnOffsetBmp + 5761] = scrCols0[vRamTileValue1 & 8];
+                            screenBytes[columnOffsetBmp + 5762] = scrCols0[vRamTileValue2 & 8];
+                            screenBytes[columnOffsetBmp + 5763] = scrCols0[vRamTileValue2 & 8];
+
+                            screenBytes[columnOffsetBmp + 6400] = scrCols0[vRamTileValue1 & 4];
+                            screenBytes[columnOffsetBmp + 6401] = scrCols0[vRamTileValue1 & 4];
+                            screenBytes[columnOffsetBmp + 6402] = scrCols0[vRamTileValue2 & 4];
+                            screenBytes[columnOffsetBmp + 6403] = scrCols0[vRamTileValue2 & 4];
+
+                            screenBytes[columnOffsetBmp + 7040] = scrCols0[vRamTileValue1 & 4];
+                            screenBytes[columnOffsetBmp + 7041] = scrCols0[vRamTileValue1 & 4];
+                            screenBytes[columnOffsetBmp + 7042] = scrCols0[vRamTileValue2 & 4];
+                            screenBytes[columnOffsetBmp + 7043] = scrCols0[vRamTileValue2 & 4];
+
+                            screenBytes[columnOffsetBmp + 7680] = scrCols0[vRamTileValue1 & 2];
+                            screenBytes[columnOffsetBmp + 7681] = scrCols0[vRamTileValue1 & 2];
+                            screenBytes[columnOffsetBmp + 7682] = scrCols0[vRamTileValue2 & 2];
+                            screenBytes[columnOffsetBmp + 7683] = scrCols0[vRamTileValue2 & 2];
+
+                            screenBytes[columnOffsetBmp + 8320] = scrCols0[vRamTileValue1 & 2];
+                            screenBytes[columnOffsetBmp + 8321] = scrCols0[vRamTileValue1 & 2];
+                            screenBytes[columnOffsetBmp + 8322] = scrCols0[vRamTileValue2 & 2];
+                            screenBytes[columnOffsetBmp + 8323] = scrCols0[vRamTileValue2 & 2];
+
+                            screenBytes[columnOffsetBmp + 8960] = scrCols0[vRamTileValue1 & 1];
+                            screenBytes[columnOffsetBmp + 8961] = scrCols0[vRamTileValue1 & 1];
+                            screenBytes[columnOffsetBmp + 8962] = scrCols0[vRamTileValue2 & 1];
+                            screenBytes[columnOffsetBmp + 8963] = scrCols0[vRamTileValue2 & 1];
+
+                            screenBytes[columnOffsetBmp + 9600] = scrCols0[vRamTileValue1 & 1];
+                            screenBytes[columnOffsetBmp + 9601] = scrCols0[vRamTileValue1 & 1];
+                            screenBytes[columnOffsetBmp + 9602] = scrCols0[vRamTileValue2 & 1];
+                            screenBytes[columnOffsetBmp + 9603] = scrCols0[vRamTileValue2 & 1];
+
+                            tileOffsetVram += 2;
+                            columnOffsetBmp = (tileScreenIndex / 53) * 10240;
+                            tileColorIndex++;
+                        }
+                    }
+                    break;
             }
 
             lock (copylock)
             {
                 // sprites
-                for (int sprnum = 0; sprnum < SPRITES_NUM; sprnum++)
+                switch (videoMode)
                 {
-                    int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_2 : SPRITE_PARAMS_1) + (sprnum << 3);
-                    int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_2 : SPRITE_DATA_1) + (sprnum << 5);
-                    if (Ram[sparams + SPRITE_ENABLE] == 1)
-                        BlitSprite(ref sparams, ref sdata);
+                    case 1:
+                        for (int sprnum = 0; sprnum < SPRITES_NUM; sprnum++)
+                        {
+                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_1_2 : SPRITE_PARAMS_1_1) + (sprnum << 3);
+                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_1_2 : SPRITE_DATA_1_1) + (sprnum << 7);
+                            if (Ram[sparams + SPRITE_ENABLE] == 1)
+                                BlitSpriteMode1(ref sparams, ref sdata);
+                        }
+                        break;
+
+                    default:
+                        for (int sprnum = 0; sprnum < SPRITES_NUM; sprnum++)
+                        {
+                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_0_2 : SPRITE_PARAMS_0_1) + (sprnum << 3);
+                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_0_2 : SPRITE_DATA_0_1) + (sprnum << 5);
+                            if (Ram[sparams + SPRITE_ENABLE] == 1)
+                                BlitSpriteMode0(ref sparams, ref sdata);
+                        }
+                        break;
                 }
-                BitmapData bmpdata = screenBitMap.LockBits(new Rectangle(0, 0, Width << 1, Height << 1), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+                BitmapData bmpdata = screenBitMap.LockBits(new Rectangle(0, 0, Width << 1, Height0 << 1), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
                 Marshal.Copy(screenBytes, 0, bmpdata.Scan0, screenBytes.Length);
                 screenBitMap.UnlockBits(bmpdata);
                 vblCounter++;
@@ -412,13 +648,101 @@ namespace LionComputerEmulator
                 return screenBitMap;
             }
         }
+        
+        private static void BlitSpriteMode1(ref int spriteParams, ref int spriteData)
+        {
+            int __maxclip = screenBytes.Length - 64 - borderZeroBmpBytesNum;
+            int x = (Ram[spriteParams++] << 8 | Ram[spriteParams++]) << 1;
+            int y = (Ram[spriteParams++] << 8 | Ram[spriteParams]) << 1;
+            int srcScreenIndex = borderZeroBmpBytesNum + y * 640 + x;
+            for (int sprndx = 0; sprndx < 16; sprndx++)
+            {
+                if (srcScreenIndex >= __maxclip)
+                    break;
+                sprMaskBytes[00] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[01] = sprMaskBytes[00];
+                sprColorBytes[00] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[01] = sprColorBytes[00];
+                sprMaskBytes[02] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[03] = sprMaskBytes[02];
+                sprColorBytes[02] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[03] = sprColorBytes[02];
+                sprMaskBytes[04] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[05] = sprMaskBytes[04];
+                sprColorBytes[04] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[05] = sprColorBytes[04];
+                sprMaskBytes[06] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[07] = sprMaskBytes[06];
+                sprColorBytes[06] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[07] = sprColorBytes[06];
+                sprMaskBytes[08] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[09] = sprMaskBytes[08];
+                sprColorBytes[08] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[09] = sprColorBytes[08];
+                sprMaskBytes[10] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[11] = sprMaskBytes[10];
+                sprColorBytes[10] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[11] = sprColorBytes[10];
+                sprMaskBytes[12] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[13] = sprMaskBytes[12];
+                sprColorBytes[12] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[13] = sprColorBytes[12];
+                sprMaskBytes[14] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[15] = sprMaskBytes[14];
+                sprColorBytes[14] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[15] = sprColorBytes[14];
+                sprMaskBytes[16] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[17] = sprMaskBytes[16];
+                sprColorBytes[16] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[17] = sprColorBytes[16];
+                sprMaskBytes[18] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[19] = sprMaskBytes[18];
+                sprColorBytes[18] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[19] = sprColorBytes[18];
+                sprMaskBytes[20] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[21] = sprMaskBytes[20];
+                sprColorBytes[20] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[21] = sprColorBytes[20];
+                sprMaskBytes[22] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[23] = sprMaskBytes[22];
+                sprColorBytes[22] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[23] = sprColorBytes[22];
+                sprMaskBytes[24] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[25] = sprMaskBytes[24];
+                sprColorBytes[24] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[25] = sprColorBytes[24];
+                sprMaskBytes[26] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[27] = sprMaskBytes[26];
+                sprColorBytes[26] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[27] = sprColorBytes[26];
+                sprMaskBytes[28] = sprMaskValsMode1[Ram[spriteData] >> 7];
+                sprMaskBytes[29] = sprMaskBytes[28];
+                sprColorBytes[28] = (byte)((Ram[spriteData] >> 4) & 0x07);
+                sprColorBytes[29] = sprColorBytes[28];
+                sprMaskBytes[30] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
+                sprMaskBytes[31] = sprMaskBytes[30];
+                sprColorBytes[30] = (byte)(Ram[spriteData++] & 0x07);
+                sprColorBytes[31] = sprColorBytes[30];
+                Buffer.BlockCopy(sprMaskBytes, 0, maskBitBlock, 0, 32);
+                Buffer.BlockCopy(sprColorBytes, 0, spriteBitBlock, 0, 32);
+                Buffer.BlockCopy(screenBytes, srcScreenIndex, screenBitBlock, 0, 32);
+                rasterOpBitBlock[0] = screenBitBlock[0] & maskBitBlock[0] | spriteBitBlock[0];
+                rasterOpBitBlock[1] = screenBitBlock[1] & maskBitBlock[1] | spriteBitBlock[1];
+                rasterOpBitBlock[2] = screenBitBlock[2] & maskBitBlock[2] | spriteBitBlock[2];
+                rasterOpBitBlock[3] = screenBitBlock[3] & maskBitBlock[3] | spriteBitBlock[3];
+                Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);
+                srcScreenIndex += 640;
+                Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);
+                srcScreenIndex += 640;
+            }
+        }
 
-        private static void BlitSprite(ref int spriteParams, ref int spriteData)
+        private static void BlitSpriteMode0(ref int spriteParams, ref int spriteData)
         {
             sprColVals[1] = Ram[spriteParams + SPRITE_COLOR]; // [0] always black
             int x = (Ram[spriteParams++] << 8 | Ram[spriteParams++]) << 1;
             int y = (Ram[spriteParams++] << 8 | Ram[spriteParams]) << 1;
-            int srcScreenIndex = y * 768 + x;
+            int srcScreenIndex = y * 640 + x;
             int sprdata = 0, sprPixlndx = 0;
             for (int sprndx = 0; sprndx < 16; sprndx++)
             {
@@ -442,6 +766,7 @@ namespace LionComputerEmulator
                 sprPixelBytes[13] = (byte)((sprdata >> sprPixlndx++) & 1);
                 sprPixelBytes[14] = (byte)((sprdata >> sprPixlndx++) & 1);
                 sprPixelBytes[15] = (byte)((sprdata >> sprPixlndx) & 1);
+                // mask
                 sprMaskBytes[00] = sprMaskVals[sprPixelBytes[0]];
                 sprMaskBytes[01] = sprMaskVals[sprPixelBytes[0]];
                 sprMaskBytes[02] = sprMaskVals[sprPixelBytes[1]];
@@ -515,11 +840,11 @@ namespace LionComputerEmulator
                 rasterOpBitBlock[2] = screenBitBlock[2] & maskBitBlock[2] | spriteBitBlock[2];
                 rasterOpBitBlock[3] = screenBitBlock[3] & maskBitBlock[3] | spriteBitBlock[3];
                 Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);
-                srcScreenIndex += 768;
+                srcScreenIndex += 640;
                 if (srcScreenIndex >= screenBytes.Length - 32)
                     break;
                 Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);
-                srcScreenIndex += 768;
+                srcScreenIndex += 640;
             }
         }
         public static object copylock = new object();

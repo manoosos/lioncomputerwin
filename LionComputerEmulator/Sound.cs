@@ -178,7 +178,7 @@ namespace LionComputerEmulator
                     {
                         frequency = 100000 / frequency;
                         int msDuration = (portValue & 0x0c000);
-                        int amplitude = 32760;  // Max amplitude for 16-bit audio
+                        int amplitude = 16380;  // Max amplitude for 16-bit audio
 
                         switch (msDuration)
                         {

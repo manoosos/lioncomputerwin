@@ -715,6 +715,56 @@ PC: {2}";
             }
         }
 
+        private void mnuImportLeonImage_Click(object sender, EventArgs e)
+        {
+            pauseEmulation = true;
+            try
+            {
+                string fname;
+                if (string.IsNullOrEmpty(fname = OpenFile("SCR files|*.scr|All files|*.*")))
+                    return;
+                if (Path.GetExtension(fname).ToLower() != ".scr")
+                    fname += ".scr";
+                byte[] scr = File.ReadAllBytes(fname);
+                int _imagemaxlen = Display.VIDEO_RAM_END_MODE1 - Display.VIDEO_RAM_START_MODE1;
+                Buffer.BlockCopy(scr, 0, Display.Ram, Display.VIDEO_RAM_START_MODE1, scr.Length < _imagemaxlen ? scr.Length : _imagemaxlen);
+            }
+            catch (Exception ex)
+            {
+                string msg = @"Exception: {0}
+{1}
+
+PC: {2}";
+                MessageBox.Show(string.Format(msg, ex.Message, ex.StackTrace, Convert.ToString(State.PC, 16).PadLeft(4, '0')), "Λάθος", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                pauseEmulation = false;
+            }
+        }
+
+        private void mnuExportLeonImage_Click(object sender, EventArgs e)
+        {
+            pauseEmulation = true;
+            try
+            {
+                string fname;
+                if (string.IsNullOrEmpty(fname = SaveFile("SCR files|*.scr|All files|*.*")))
+                    return;
+                if (Path.GetExtension(fname).ToLower() != ".scr")
+                    fname += ".scr";
+                int _imagemaxlen = Display.VIDEO_RAM_END_MODE1 - Display.VIDEO_RAM_START_MODE1;
+
+                byte[] scr = new byte[_imagemaxlen];
+                Buffer.BlockCopy(Display.Ram, Display.VIDEO_RAM_START_MODE1, scr, 0, _imagemaxlen);
+                File.WriteAllBytes(fname, scr);
+            }
+            finally
+            {
+                pauseEmulation = false;
+            }
+        }
+
         private void picMouseClick(object sender, MouseEventArgs e)
         {
             switch (e.Button)

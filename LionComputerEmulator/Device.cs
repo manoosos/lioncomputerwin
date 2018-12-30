@@ -32,12 +32,13 @@ namespace LionComputerEmulator
         public const ushort SPI_CONTROL = 19;
         public const ushort TIMER_SPRITES = 20;
         public const ushort JOYSTICK = 22; // joy1: low byte, joy2: high byte
+        public const ushort VIDEO_MODE = 24;
 
         // useful values
         public const ushort JoyValueRIGHT = 0x010;
         public const ushort JoyValueLEFT = 8;
-        public const ushort JoyValueDOWN = 4;
-        public const ushort JoyValueUP = 2;
+        public const ushort JoyValueUP = 4;
+        public const ushort JoyValueDOWN = 2;
         public const ushort JoyValueBUTTON = 1;
 
         /// <summary>
@@ -98,6 +99,12 @@ namespace LionComputerEmulator
                                 // pass sprite parameter-data bank
                                 while (Display.SpritePortWorker.IsBusy) ;
                                 Display.SpritePortWorker.RunWorkerAsync(value);
+                                break;
+
+                            case VIDEO_MODE:
+                                // pass videomode number 0 - 1
+                                while (Display.VideoModePortWorker.IsBusy) ;
+                                Display.VideoModePortWorker.RunWorkerAsync(value);
                                 break;
                         }
                     }

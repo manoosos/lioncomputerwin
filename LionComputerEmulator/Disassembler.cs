@@ -134,7 +134,7 @@ namespace LionComputerEmulator
                 (State.SR & State.I) == State.I ? "I" : "-",
                 (State.SR & 0x040) == 0x040 ? "?" : "-",
                 (State.SR & State.T) == State.T ? "T" : "-",
-                (State.SR & 0x010) == 0x010 ? "?" : "-",
+                (State.SR & State.D) == State.D ? "D" : "-",
                 (State.SR & State.N) == State.N ? "N" : "-",
                 (State.SR & State.Z) == State.Z ? "Z" : "-",
                 (State.SR & State.O) == State.O ? "O" : "-",

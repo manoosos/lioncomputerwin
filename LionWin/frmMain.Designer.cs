@@ -42,6 +42,9 @@
             this.mnuSaveMemory = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuSaveBmp = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuImportLeonImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuExportLeonImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuQuit = new System.Windows.Forms.ToolStripMenuItem();
             this.btnReset = new System.Windows.Forms.Button();
             this.pnlDebug = new System.Windows.Forms.Panel();
@@ -65,14 +68,14 @@
             // 
             this.picScreen.Location = new System.Drawing.Point(12, 35);
             this.picScreen.Name = "picScreen";
-            this.picScreen.Size = new System.Drawing.Size(768, 496);
+            this.picScreen.Size = new System.Drawing.Size(640, 480);
             this.picScreen.TabIndex = 0;
             this.picScreen.TabStop = false;
             this.picScreen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picMouseClick);
             // 
             // btnRun
             // 
-            this.btnRun.Location = new System.Drawing.Point(809, 35);
+            this.btnRun.Location = new System.Drawing.Point(658, 35);
             this.btnRun.Name = "btnRun";
             this.btnRun.Size = new System.Drawing.Size(84, 33);
             this.btnRun.TabIndex = 2;
@@ -83,7 +86,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(809, 83);
+            this.btnStop.Location = new System.Drawing.Point(658, 83);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(84, 33);
             this.btnStop.TabIndex = 3;
@@ -98,7 +101,7 @@
             this.mnuFile});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(898, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(751, 24);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -114,6 +117,9 @@
             this.mnuSaveMemory,
             this.mnuSaveBmp,
             this.toolStripSeparator3,
+            this.mnuImportLeonImage,
+            this.mnuExportLeonImage,
+            this.toolStripSeparator4,
             this.mnuQuit});
             this.mnuFile.Name = "mnuFile";
             this.mnuFile.Size = new System.Drawing.Size(37, 20);
@@ -176,6 +182,25 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
             // 
+            // mnuImportLeonImage
+            // 
+            this.mnuImportLeonImage.Name = "mnuImportLeonImage";
+            this.mnuImportLeonImage.Size = new System.Drawing.Size(180, 22);
+            this.mnuImportLeonImage.Text = "Import Leon Image";
+            this.mnuImportLeonImage.Click += new System.EventHandler(this.mnuImportLeonImage_Click);
+            // 
+            // mnuExportLeonImage
+            // 
+            this.mnuExportLeonImage.Name = "mnuExportLeonImage";
+            this.mnuExportLeonImage.Size = new System.Drawing.Size(180, 22);
+            this.mnuExportLeonImage.Text = "Export Leon Image";
+            this.mnuExportLeonImage.Click += new System.EventHandler(this.mnuExportLeonImage_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            // 
             // mnuQuit
             // 
             this.mnuQuit.Name = "mnuQuit";
@@ -185,7 +210,7 @@
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(809, 132);
+            this.btnReset.Location = new System.Drawing.Point(658, 132);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(84, 33);
             this.btnReset.TabIndex = 7;
@@ -207,7 +232,7 @@
             this.pnlDebug.Controls.Add(this.label2);
             this.pnlDebug.Controls.Add(this.lblPC);
             this.pnlDebug.Controls.Add(this.label1);
-            this.pnlDebug.Location = new System.Drawing.Point(805, 187);
+            this.pnlDebug.Location = new System.Drawing.Point(658, 187);
             this.pnlDebug.Name = "pnlDebug";
             this.pnlDebug.Size = new System.Drawing.Size(81, 173);
             this.pnlDebug.TabIndex = 17;
@@ -316,7 +341,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(898, 559);
+            this.ClientSize = new System.Drawing.Size(751, 528);
             this.Controls.Add(this.pnlDebug);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnStop);
@@ -360,6 +385,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem mnuSaveMemory;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem mnuImportLeonImage;
+        private System.Windows.Forms.ToolStripMenuItem mnuExportLeonImage;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem mnuQuit;
         private System.Windows.Forms.ToolStripMenuItem mnuSaveBmp;
         private System.Windows.Forms.Panel pnlDebug;

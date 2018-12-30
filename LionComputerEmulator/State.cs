@@ -26,6 +26,11 @@
         public const byte N = 8;
 
         /// <summary>
+        /// SR Direction Flag
+        /// </summary>
+        public const byte D = 0x010;
+
+        /// <summary>
         /// SR Trace Flag
         /// </summary>
         public const byte T = 0x020;
@@ -48,7 +53,7 @@
         /// <summary>
         /// Status Register
         /// </summary>
-        public static byte SR = 0; // I ? T ? N Z O C
+        public static byte SR = 0; //  I ? T D Z N O C
 
         /// <summary>
         /// Stack Pointer
