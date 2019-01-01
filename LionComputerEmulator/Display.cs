@@ -64,8 +64,6 @@ namespace LionComputerEmulator
         private static int videoMode = 0;  // updated from videomode port worker
 
         private static uint vblCounter = 0;
-        private static int __vblCounterHigh = 0;
-        private static int __vblCounterLow = 0;
 
         private const int borderZeroBmpBytesNum = (Width << 1) * (Height0 - Height1);
 
@@ -237,8 +235,7 @@ namespace LionComputerEmulator
 
             SpritePortWorker.DoWork += SpritePortWork;
             VideoModePortWorker.DoWork += VideoModePortWork;
-            __vblCounterHigh = Cpu.COUNTER;
-            __vblCounterLow = Cpu.COUNTER + 1;
+            vblCounter = 0;
         }
 
         public static Bitmap Screen()

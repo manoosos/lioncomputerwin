@@ -41,6 +41,8 @@ namespace LionComputerEmulator
             //WaveEventCh2.PlaybackStopped += PlaybackStoppedCh2;
             WorkerChannel1.DoWork += doWork1;
             WorkerChannel2.DoWork += doWork2;
+            WaveEventCh1.Volume = 0.3f;
+            WaveEventCh2.Volume = 0.3f;
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace LionComputerEmulator
                     {
                         frequency = 100000 / frequency;
                         int msDuration = (portValue & 0x0c000);
-                        int amplitude = 16380; // Max amplitude for 16-bit audio
+                        int amplitude = 32760; // Max amplitude for 16-bit audio
 
                         switch (msDuration)
                         {
@@ -178,7 +180,7 @@ namespace LionComputerEmulator
                     {
                         frequency = 100000 / frequency;
                         int msDuration = (portValue & 0x0c000);
-                        int amplitude = 16380;  // Max amplitude for 16-bit audio
+                        int amplitude = 32760; // Max amplitude for 16-bit audio
 
                         switch (msDuration)
                         {
