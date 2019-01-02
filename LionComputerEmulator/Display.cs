@@ -8,31 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
 
-/*
- * sprites:
- * 11 sprites
- * 63152 F6B0: parameters
- * SX,  SY,  SDX, SDY, SCOLOR,   SENABLE
- * word word byte byte byte3lsb  byte
- * +128 bank 2 63280 F730
- * 
- * sprite data: 63552 F840 
- * 16words (16x16)
- * bank 2: 64064 FA40
- * 
- * multi color sprites:
- * 11 sprites
- * 
- * sprite data: 16384 4000
- * 8bytes x 16 lines
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
 namespace LionComputerEmulator
 {
     public static class Display
@@ -70,7 +45,7 @@ namespace LionComputerEmulator
         /// <summary>
         /// Mode 0 Sprite Parameters Bank 1
         /// </summary>
-        public const int SPRITE_PARAMS_0_1 = 0x0f6b0;
+        public const int SPRITE_PARAMS_0_1 = 63152;
 
         /// <summary>
         /// Mode 0 Sprite Parameters Bank 2
@@ -80,7 +55,7 @@ namespace LionComputerEmulator
         /// <summary>
         /// Mode 0 Sprite Data Bank 1 at address 63552
         /// </summary>
-        public const int SPRITE_DATA_0_1 = 0x0f840;
+        public const int SPRITE_DATA_0_1 = 63552;
 
         /// <summary>
         /// Mode 0 Sprite Data Bank 2 at address 64064
@@ -115,7 +90,8 @@ namespace LionComputerEmulator
         public const int SPRITE_COLOR = 6;   // byte
         public const int SPRITE_ENABLE = 7;  // byte
 
-        private const int SPRITES_NUM = 11;
+        private const int SPRITES_NUM_MODE0 = 11;
+        private const int SPRITES_NUM_MODE1 = 16;
 
         /// <summary>
         /// Start of VIDEO RAM Address Mode 0
@@ -617,7 +593,7 @@ namespace LionComputerEmulator
                 switch (videoMode)
                 {
                     case 1:
-                        for (int sprnum = 0; sprnum < SPRITES_NUM; sprnum++)
+                        for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
                         {
                             int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_1_2 : SPRITE_PARAMS_1_1) + (sprnum << 3);
                             int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_1_2 : SPRITE_DATA_1_1) + (sprnum << 7);
@@ -627,7 +603,7 @@ namespace LionComputerEmulator
                         break;
 
                     default:
-                        for (int sprnum = 0; sprnum < SPRITES_NUM; sprnum++)
+                        for (int sprnum = 0; sprnum < SPRITES_NUM_MODE0; sprnum++)
                         {
                             int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_0_2 : SPRITE_PARAMS_0_1) + (sprnum << 3);
                             int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_0_2 : SPRITE_DATA_0_1) + (sprnum << 5);
@@ -645,7 +621,7 @@ namespace LionComputerEmulator
                 return screenBitMap;
             }
         }
-        
+
         private static void BlitSpriteMode1(ref int spriteParams, ref int spriteData)
         {
             int __maxclip = screenBytes.Length - 64 - borderZeroBmpBytesNum;

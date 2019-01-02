@@ -422,6 +422,33 @@ namespace LionComputerEmulator
             }
             else
             {
+                // jump on flags with bwb, correct mnemonic
+                if (instruction.Type == OperationType.Branch)
+                {
+                    ushort opcode = (ushort)(instruction.OpCodeValue & 0x0fe00);
+                    if ((instruction.OpCodeValue & 0x020) > 0)
+                    {
+                        switch (opcode)
+                        {
+                            case 0x04e00:
+                                instruction.Mnemonic = "JZ";
+                                break;
+
+                            case 0x05200:
+                                instruction.Mnemonic = "JO";
+                                break;
+
+                            case 0x05600:
+                                instruction.Mnemonic = "JC";
+                                break;
+
+                            case 0x05a00:
+                                instruction.Mnemonic = "JN";
+                                break;
+                        }
+                    }
+                }
+
                 // operands with addressing modes
                 // destination addressing
                 switch (instruction.AddressingModeDestination)
