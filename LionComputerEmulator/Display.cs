@@ -45,42 +45,62 @@ namespace LionComputerEmulator
         /// <summary>
         /// Mode 0 Sprite Parameters Bank 1
         /// </summary>
-        public const int SPRITE_PARAMS_0_1 = 63152;
+        public const int SPRITE_0_PARAMS_1 = 63152;
 
         /// <summary>
         /// Mode 0 Sprite Parameters Bank 2
         /// </summary>
-        public const int SPRITE_PARAMS_0_2 = SPRITE_PARAMS_0_1 + 128;
+        public const int SPRITE_0_PARAMS_2 = SPRITE_0_PARAMS_1 + 128;
 
         /// <summary>
         /// Mode 0 Sprite Data Bank 1 at address 63552
         /// </summary>
-        public const int SPRITE_DATA_0_1 = 63552;
+        public const int SPRITE_0_DATA_1 = 63552;
 
         /// <summary>
         /// Mode 0 Sprite Data Bank 2 at address 64064
         /// </summary>
-        public const int SPRITE_DATA_0_2 = SPRITE_DATA_0_1 + 512;
+        public const int SPRITE_0_DATA_2 = SPRITE_0_DATA_1 + 512;
 
         /// <summary>
-        /// Mode 1 Sprite Parameters Bank 1
+        /// Mode 1 Sprite Slot A Parameters Bank 1
         /// </summary>
-        public const int SPRITE_PARAMS_1_1 = 16384;
+        public const int SPRITE_A_PARAMS_1 = 16384;
 
         /// <summary>
-        /// Mode 1 Sprite Parameters Bank 2
+        /// Mode 1 Sprite Slot A Parameters Bank 2
         /// </summary>
-        public const int SPRITE_PARAMS_1_2 = SPRITE_PARAMS_1_1 + 256;
+        public const int SPRITE_A_PARAMS_2 = SPRITE_A_PARAMS_1 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Data Bank 1
+        /// Mode 1 Sprite Slot A Data Bank 1
         /// </summary>
-        public const int SPRITE_DATA_1_1 = SPRITE_PARAMS_1_2 + 256;
+        public const int SPRITE_A_DATA_1 = SPRITE_A_PARAMS_2 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Data Bank 2
+        /// Mode 1 Sprite Slot A Data Bank 2
         /// </summary>
-        public const int SPRITE_DATA_1_2 = SPRITE_PARAMS_1_1 + 4352;
+        public const int SPRITE_A_DATA_2 = SPRITE_A_PARAMS_1 + 2304;
+
+        /// <summary>
+        /// Mode 1 Sprite Slot B Parameters Bank 1
+        /// </summary>
+        public const int SPRITE_B_PARAMS_1 = SPRITE_A_PARAMS_1 + 4096;
+
+        /// <summary>
+        /// Mode 1 Sprite Slot B Parameters Bank 2
+        /// </summary>
+        public const int SPRITE_B_PARAMS_2 = SPRITE_B_PARAMS_1 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Slot B Data Bank 1
+        /// </summary>
+        public const int SPRITE_B_DATA_1 = SPRITE_B_PARAMS_2 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Slot B Data Bank 2
+        /// </summary>
+        public const int SPRITE_B_DATA_2 = SPRITE_B_PARAMS_1 + 2304;
 
         // offsets in sprite parameters
         public const int SPRITE_X = 0;       // word
@@ -91,7 +111,7 @@ namespace LionComputerEmulator
         public const int SPRITE_ENABLE = 7;  // byte
 
         private const int SPRITES_NUM_MODE0 = 11;
-        private const int SPRITES_NUM_MODE1 = 16;
+        private const int SPRITES_NUM_MODE1 = 14;
 
         /// <summary>
         /// Start of VIDEO RAM Address Mode 0
@@ -593,10 +613,19 @@ namespace LionComputerEmulator
                 switch (videoMode)
                 {
                     case 1:
+                        // Slot A Sprites
                         for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
                         {
-                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_1_2 : SPRITE_PARAMS_1_1) + (sprnum << 3);
-                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_1_2 : SPRITE_DATA_1_1) + (sprnum << 7);
+                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_A_PARAMS_2 : SPRITE_A_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_A_DATA_2 : SPRITE_A_DATA_1) + (sprnum << 7);
+                            if (Ram[sparams + SPRITE_ENABLE] == 1)
+                                BlitSpriteMode1(ref sparams, ref sdata);
+                        }
+                        // Slot B Sprites
+                        for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
+                        {
+                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_B_PARAMS_2 : SPRITE_B_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_B_DATA_2 : SPRITE_B_DATA_1) + (sprnum << 7);
                             if (Ram[sparams + SPRITE_ENABLE] == 1)
                                 BlitSpriteMode1(ref sparams, ref sdata);
                         }
@@ -605,8 +634,8 @@ namespace LionComputerEmulator
                     default:
                         for (int sprnum = 0; sprnum < SPRITES_NUM_MODE0; sprnum++)
                         {
-                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_PARAMS_0_2 : SPRITE_PARAMS_0_1) + (sprnum << 3);
-                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_DATA_0_2 : SPRITE_DATA_0_1) + (sprnum << 5);
+                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_0_PARAMS_2 : SPRITE_0_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_0_DATA_2 : SPRITE_0_DATA_1) + (sprnum << 5);
                             if (Ram[sparams + SPRITE_ENABLE] == 1)
                                 BlitSpriteMode0(ref sparams, ref sdata);
                         }
