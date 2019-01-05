@@ -35,7 +35,7 @@ namespace LionComputerEmulator
         private static ulong[] maskBitBlock = new ulong[4];
         private static ulong[] rasterOpBitBlock = new ulong[4];
 
-        private static int spriteBank = 0; // updated from sprite port worker
+        private static int spriteBuffer = 0; // updated from sprite port worker
         private static int videoMode = 0;  // updated from videomode port worker
 
         private static uint vblCounter = 0;
@@ -43,64 +43,84 @@ namespace LionComputerEmulator
         private const int borderZeroBmpBytesNum = (Width << 1) * (Height0 - Height1);
 
         /// <summary>
-        /// Mode 0 Sprite Parameters Bank 1
+        /// Mode 0 Sprite Parameters Buffer 1
         /// </summary>
         public const int SPRITE_0_PARAMS_1 = 63152;
 
         /// <summary>
-        /// Mode 0 Sprite Parameters Bank 2
+        /// Mode 0 Sprite Parameters Buffer 2
         /// </summary>
         public const int SPRITE_0_PARAMS_2 = SPRITE_0_PARAMS_1 + 128;
 
         /// <summary>
-        /// Mode 0 Sprite Data Bank 1 at address 63552
+        /// Mode 0 Sprite Data Buffer 1 at address 63552
         /// </summary>
         public const int SPRITE_0_DATA_1 = 63552;
 
         /// <summary>
-        /// Mode 0 Sprite Data Bank 2 at address 64064
+        /// Mode 0 Sprite Data Buffer 2 at address 64064
         /// </summary>
         public const int SPRITE_0_DATA_2 = SPRITE_0_DATA_1 + 512;
 
         /// <summary>
-        /// Mode 1 Sprite Slot A Parameters Bank 1
+        /// Mode 1 Sprite Bank A Parameters Buffer 1
         /// </summary>
         public const int SPRITE_A_PARAMS_1 = 16384;
 
         /// <summary>
-        /// Mode 1 Sprite Slot A Parameters Bank 2
+        /// Mode 1 Sprite Bank A Parameters Buffer 2
         /// </summary>
         public const int SPRITE_A_PARAMS_2 = SPRITE_A_PARAMS_1 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Slot A Data Bank 1
+        /// Mode 1 Sprite Bank A Data Buffer 1
         /// </summary>
         public const int SPRITE_A_DATA_1 = SPRITE_A_PARAMS_2 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Slot A Data Bank 2
+        /// Mode 1 Sprite Bank A Data Buffer 2
         /// </summary>
         public const int SPRITE_A_DATA_2 = SPRITE_A_PARAMS_1 + 2304;
 
         /// <summary>
-        /// Mode 1 Sprite Slot B Parameters Bank 1
+        /// Mode 1 Sprite Bank B Parameters Buffer 1
         /// </summary>
         public const int SPRITE_B_PARAMS_1 = SPRITE_A_PARAMS_1 + 4096;
 
         /// <summary>
-        /// Mode 1 Sprite Slot B Parameters Bank 2
+        /// Mode 1 Sprite Bank B Parameters Buffer 2
         /// </summary>
         public const int SPRITE_B_PARAMS_2 = SPRITE_B_PARAMS_1 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Slot B Data Bank 1
+        /// Mode 1 Sprite Bank B Data Buffer 1
         /// </summary>
         public const int SPRITE_B_DATA_1 = SPRITE_B_PARAMS_2 + 256;
 
         /// <summary>
-        /// Mode 1 Sprite Slot B Data Bank 2
+        /// Mode 1 Sprite Bank B Data Buffer 2
         /// </summary>
         public const int SPRITE_B_DATA_2 = SPRITE_B_PARAMS_1 + 2304;
+
+        /// <summary>
+        /// Mode 1 Sprite Bank C Parameters Buffer 1
+        /// </summary>
+        public const int SPRITE_C_PARAMS_1 = SPRITE_B_PARAMS_1 + 4096;
+
+        /// <summary>
+        /// Mode 1 Sprite Bank C Parameters Buffer 2
+        /// </summary>
+        public const int SPRITE_C_PARAMS_2 = SPRITE_C_PARAMS_1 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Bank C Data Buffer 1
+        /// </summary>
+        public const int SPRITE_C_DATA_1 = SPRITE_C_PARAMS_2 + 256;
+
+        /// <summary>
+        /// Mode 1 Sprite Bank C Data Buffer 2
+        /// </summary>
+        public const int SPRITE_C_DATA_2 = SPRITE_C_PARAMS_1 + 2304;
 
         // offsets in sprite parameters
         public const int SPRITE_X = 0;       // word
@@ -110,8 +130,8 @@ namespace LionComputerEmulator
         public const int SPRITE_COLOR = 6;   // byte
         public const int SPRITE_ENABLE = 7;  // byte
 
-        private const int SPRITES_NUM_MODE0 = 11;
-        private const int SPRITES_NUM_MODE1 = 14;
+        public const int SPRITES_NUM_MODE0 = 11;
+        public const int SPRITES_NUM_MODE1 = 14;
 
         /// <summary>
         /// Start of VIDEO RAM Address Mode 0
@@ -166,7 +186,7 @@ namespace LionComputerEmulator
         private static void SpritePortWork(object sender, DoWorkEventArgs e)
         {
             lock (copylock)
-                spriteBank = Convert.ToInt32(e.Argument);
+                spriteBuffer = Convert.ToInt32(e.Argument);
         }
 
         // argument passed from the videomode port access
@@ -613,19 +633,27 @@ namespace LionComputerEmulator
                 switch (videoMode)
                 {
                     case 1:
-                        // Slot A Sprites
+                        // Bank A Sprites
                         for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
                         {
-                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_A_PARAMS_2 : SPRITE_A_PARAMS_1) + (sprnum << 3);
-                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_A_DATA_2 : SPRITE_A_DATA_1) + (sprnum << 7);
+                            int sparams = ((spriteBuffer & 1) == 1 ? SPRITE_A_PARAMS_2 : SPRITE_A_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBuffer & 2) == 2 ? SPRITE_A_DATA_2 : SPRITE_A_DATA_1) + (sprnum << 7);
                             if (Ram[sparams + SPRITE_ENABLE] == 1)
                                 BlitSpriteMode1(ref sparams, ref sdata);
                         }
-                        // Slot B Sprites
+                        // Bank B Sprites
                         for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
                         {
-                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_B_PARAMS_2 : SPRITE_B_PARAMS_1) + (sprnum << 3);
-                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_B_DATA_2 : SPRITE_B_DATA_1) + (sprnum << 7);
+                            int sparams = ((spriteBuffer & 1) == 1 ? SPRITE_B_PARAMS_2 : SPRITE_B_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBuffer & 2) == 2 ? SPRITE_B_DATA_2 : SPRITE_B_DATA_1) + (sprnum << 7);
+                            if (Ram[sparams + SPRITE_ENABLE] == 1)
+                                BlitSpriteMode1(ref sparams, ref sdata);
+                        }
+                        // Bank C Sprites
+                        for (int sprnum = 0; sprnum < SPRITES_NUM_MODE1; sprnum++)
+                        {
+                            int sparams = ((spriteBuffer & 1) == 1 ? SPRITE_C_PARAMS_2 : SPRITE_C_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBuffer & 2) == 2 ? SPRITE_C_DATA_2 : SPRITE_C_DATA_1) + (sprnum << 7);
                             if (Ram[sparams + SPRITE_ENABLE] == 1)
                                 BlitSpriteMode1(ref sparams, ref sdata);
                         }
@@ -634,8 +662,8 @@ namespace LionComputerEmulator
                     default:
                         for (int sprnum = 0; sprnum < SPRITES_NUM_MODE0; sprnum++)
                         {
-                            int sparams = ((spriteBank & 1) == 1 ? SPRITE_0_PARAMS_2 : SPRITE_0_PARAMS_1) + (sprnum << 3);
-                            int sdata = ((spriteBank & 2) == 2 ? SPRITE_0_DATA_2 : SPRITE_0_DATA_1) + (sprnum << 5);
+                            int sparams = ((spriteBuffer & 1) == 1 ? SPRITE_0_PARAMS_2 : SPRITE_0_PARAMS_1) + (sprnum << 3);
+                            int sdata = ((spriteBuffer & 2) == 2 ? SPRITE_0_DATA_2 : SPRITE_0_DATA_1) + (sprnum << 5);
                             if (Ram[sparams + SPRITE_ENABLE] == 1)
                                 BlitSpriteMode0(ref sparams, ref sdata);
                         }
@@ -662,76 +690,76 @@ namespace LionComputerEmulator
                 if (srcScreenIndex >= __maxclip)
                     break;
                 sprMaskBytes[00] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[01] = sprMaskBytes[00];
                 sprColorBytes[00] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[01] = sprColorBytes[00];
                 sprMaskBytes[02] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[03] = sprMaskBytes[02];
                 sprColorBytes[02] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[03] = sprColorBytes[02];
                 sprMaskBytes[04] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[05] = sprMaskBytes[04];
                 sprColorBytes[04] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[05] = sprColorBytes[04];
                 sprMaskBytes[06] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[07] = sprMaskBytes[06];
                 sprColorBytes[06] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[07] = sprColorBytes[06];
                 sprMaskBytes[08] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[09] = sprMaskBytes[08];
                 sprColorBytes[08] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[09] = sprColorBytes[08];
                 sprMaskBytes[10] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[11] = sprMaskBytes[10];
                 sprColorBytes[10] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[11] = sprColorBytes[10];
                 sprMaskBytes[12] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[13] = sprMaskBytes[12];
                 sprColorBytes[12] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[13] = sprColorBytes[12];
                 sprMaskBytes[14] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[15] = sprMaskBytes[14];
                 sprColorBytes[14] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[15] = sprColorBytes[14];
                 sprMaskBytes[16] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[17] = sprMaskBytes[16];
                 sprColorBytes[16] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[17] = sprColorBytes[16];
                 sprMaskBytes[18] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[19] = sprMaskBytes[18];
                 sprColorBytes[18] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[19] = sprColorBytes[18];
                 sprMaskBytes[20] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[21] = sprMaskBytes[20];
                 sprColorBytes[20] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[21] = sprColorBytes[20];
                 sprMaskBytes[22] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[23] = sprMaskBytes[22];
                 sprColorBytes[22] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[23] = sprColorBytes[22];
                 sprMaskBytes[24] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[25] = sprMaskBytes[24];
                 sprColorBytes[24] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[25] = sprColorBytes[24];
                 sprMaskBytes[26] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[27] = sprMaskBytes[26];
                 sprColorBytes[26] = (byte)(Ram[spriteData++] & 0x07);
-                sprColorBytes[27] = sprColorBytes[26];
                 sprMaskBytes[28] = sprMaskValsMode1[Ram[spriteData] >> 7];
-                sprMaskBytes[29] = sprMaskBytes[28];
                 sprColorBytes[28] = (byte)((Ram[spriteData] >> 4) & 0x07);
-                sprColorBytes[29] = sprColorBytes[28];
                 sprMaskBytes[30] = sprMaskValsMode1[(Ram[spriteData] >> 3) & 0x01];
-                sprMaskBytes[31] = sprMaskBytes[30];
                 sprColorBytes[30] = (byte)(Ram[spriteData++] & 0x07);
+                sprMaskBytes[01] = sprMaskBytes[00];
+                sprMaskBytes[03] = sprMaskBytes[02];
+                sprMaskBytes[05] = sprMaskBytes[04];
+                sprMaskBytes[07] = sprMaskBytes[06];
+                sprMaskBytes[09] = sprMaskBytes[08];
+                sprMaskBytes[11] = sprMaskBytes[10];
+                sprMaskBytes[13] = sprMaskBytes[12];
+                sprMaskBytes[15] = sprMaskBytes[14];
+                sprMaskBytes[17] = sprMaskBytes[16];
+                sprMaskBytes[19] = sprMaskBytes[18];
+                sprMaskBytes[21] = sprMaskBytes[20];
+                sprMaskBytes[23] = sprMaskBytes[22];
+                sprMaskBytes[25] = sprMaskBytes[24];
+                sprMaskBytes[27] = sprMaskBytes[26];
+                sprMaskBytes[29] = sprMaskBytes[28];
+                sprMaskBytes[31] = sprMaskBytes[30];
+                sprColorBytes[01] = sprColorBytes[00];
+                sprColorBytes[03] = sprColorBytes[02];
+                sprColorBytes[05] = sprColorBytes[04];
+                sprColorBytes[07] = sprColorBytes[06];
+                sprColorBytes[09] = sprColorBytes[08];
+                sprColorBytes[11] = sprColorBytes[10];
+                sprColorBytes[13] = sprColorBytes[12];
+                sprColorBytes[15] = sprColorBytes[14];
+                sprColorBytes[17] = sprColorBytes[16];
+                sprColorBytes[19] = sprColorBytes[18];
+                sprColorBytes[21] = sprColorBytes[20];
+                sprColorBytes[23] = sprColorBytes[22];
+                sprColorBytes[25] = sprColorBytes[24];
+                sprColorBytes[27] = sprColorBytes[26];
+                sprColorBytes[29] = sprColorBytes[28];
                 sprColorBytes[31] = sprColorBytes[30];
                 Buffer.BlockCopy(sprMaskBytes, 0, maskBitBlock, 0, 32);
                 Buffer.BlockCopy(sprColorBytes, 0, spriteBitBlock, 0, 32);
                 Buffer.BlockCopy(screenBytes, srcScreenIndex, screenBitBlock, 0, 32);
-                rasterOpBitBlock[0] = screenBitBlock[0] & maskBitBlock[0] | spriteBitBlock[0];
-                rasterOpBitBlock[1] = screenBitBlock[1] & maskBitBlock[1] | spriteBitBlock[1];
-                rasterOpBitBlock[2] = screenBitBlock[2] & maskBitBlock[2] | spriteBitBlock[2];
-                rasterOpBitBlock[3] = screenBitBlock[3] & maskBitBlock[3] | spriteBitBlock[3];
+                rasterOpBitBlock[0] = screenBitBlock[0] & maskBitBlock[0] | (spriteBitBlock[0] & (maskBitBlock[0] ^ 0x0ffffffffffffffff));
+                rasterOpBitBlock[1] = screenBitBlock[1] & maskBitBlock[1] | (spriteBitBlock[1] & (maskBitBlock[1] ^ 0x0ffffffffffffffff));
+                rasterOpBitBlock[2] = screenBitBlock[2] & maskBitBlock[2] | (spriteBitBlock[2] & (maskBitBlock[2] ^ 0x0ffffffffffffffff));
+                rasterOpBitBlock[3] = screenBitBlock[3] & maskBitBlock[3] | (spriteBitBlock[3] & (maskBitBlock[3] ^ 0x0ffffffffffffffff));
                 Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);
                 srcScreenIndex += 640;
                 Buffer.BlockCopy(rasterOpBitBlock, 0, screenBytes, srcScreenIndex, 32);

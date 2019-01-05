@@ -96,7 +96,7 @@ namespace LionComputerEmulator
                                 break;
 
                             case TIMER_SPRITES:
-                                // pass sprite parameter-data bank
+                                // pass sprite parameter-data buffer
                                 while (Display.SpritePortWorker.IsBusy) ;
                                 Display.SpritePortWorker.RunWorkerAsync(value);
                                 break;

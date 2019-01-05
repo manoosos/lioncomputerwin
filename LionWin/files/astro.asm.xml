@@ -3,233 +3,247 @@
   <SymbolsList>
     <DasmSymbol>
       <Name>_DOT_DATA</Name>
-      <HexValue>2b9e</HexValue>
-      <BinaryValue>0010101110011110</BinaryValue>
-      <DecimalValue>11166</DecimalValue>
+      <HexValue>2f3a</HexValue>
+      <BinaryValue>0010111100111010</BinaryValue>
+      <DecimalValue>12090</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCK_DATA</Name>
-      <HexValue>2ca0</HexValue>
-      <BinaryValue>0010110010100000</BinaryValue>
-      <DecimalValue>11424</DecimalValue>
+      <HexValue>303c</HexValue>
+      <BinaryValue>0011000000111100</BinaryValue>
+      <DecimalValue>12348</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCKDX</Name>
-      <HexValue>2de6</HexValue>
-      <BinaryValue>0010110111100110</BinaryValue>
-      <DecimalValue>11750</DecimalValue>
+      <HexValue>31e2</HexValue>
+      <BinaryValue>0011000111100010</BinaryValue>
+      <DecimalValue>12770</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCKDY</Name>
-      <HexValue>2e08</HexValue>
-      <BinaryValue>0010111000001000</BinaryValue>
-      <DecimalValue>11784</DecimalValue>
+      <HexValue>3234</HexValue>
+      <BinaryValue>0011001000110100</BinaryValue>
+      <DecimalValue>12852</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCKON</Name>
-      <HexValue>2e2a</HexValue>
-      <BinaryValue>0010111000101010</BinaryValue>
-      <DecimalValue>11818</DecimalValue>
+      <HexValue>3286</HexValue>
+      <BinaryValue>0011001010000110</BinaryValue>
+      <DecimalValue>12934</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCKX</Name>
-      <HexValue>2da2</HexValue>
-      <BinaryValue>0010110110100010</BinaryValue>
-      <DecimalValue>11682</DecimalValue>
+      <HexValue>313e</HexValue>
+      <BinaryValue>0011000100111110</BinaryValue>
+      <DecimalValue>12606</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_ROCKY</Name>
-      <HexValue>2dc4</HexValue>
-      <BinaryValue>0010110111000100</BinaryValue>
-      <DecimalValue>11716</DecimalValue>
+      <HexValue>3190</HexValue>
+      <BinaryValue>0011000110010000</BinaryValue>
+      <DecimalValue>12688</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_SP1_DATA</Name>
-      <HexValue>239c</HexValue>
-      <BinaryValue>0010001110011100</BinaryValue>
-      <DecimalValue>9116</DecimalValue>
+      <HexValue>2738</HexValue>
+      <BinaryValue>0010011100111000</BinaryValue>
+      <DecimalValue>10040</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>_STRING_137</Name>
-      <HexValue>2e3c</HexValue>
-      <BinaryValue>0010111000111100</BinaryValue>
-      <DecimalValue>11836</DecimalValue>
+      <Name>_STRING_140</Name>
+      <HexValue>32b0</HexValue>
+      <BinaryValue>0011001010110000</BinaryValue>
+      <DecimalValue>12976</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>_STRING_138</Name>
-      <HexValue>2e44</HexValue>
-      <BinaryValue>0010111001000100</BinaryValue>
-      <DecimalValue>11844</DecimalValue>
+      <Name>_STRING_141</Name>
+      <HexValue>32b8</HexValue>
+      <BinaryValue>0011001010111000</BinaryValue>
+      <DecimalValue>12984</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>_STRING_163</Name>
-      <HexValue>2e4c</HexValue>
-      <BinaryValue>0010111001001100</BinaryValue>
-      <DecimalValue>11852</DecimalValue>
+      <Name>_STRING_166</Name>
+      <HexValue>32c0</HexValue>
+      <BinaryValue>0011001011000000</BinaryValue>
+      <DecimalValue>12992</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>_STRING_164</Name>
-      <HexValue>2e60</HexValue>
-      <BinaryValue>0010111001100000</BinaryValue>
-      <DecimalValue>11872</DecimalValue>
+      <Name>_STRING_167</Name>
+      <HexValue>32d4</HexValue>
+      <BinaryValue>0011001011010100</BinaryValue>
+      <DecimalValue>13012</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>_STRING_165</Name>
-      <HexValue>2e7c</HexValue>
-      <BinaryValue>0010111001111100</BinaryValue>
-      <DecimalValue>11900</DecimalValue>
+      <Name>_STRING_168</Name>
+      <HexValue>32f0</HexValue>
+      <BinaryValue>0011001011110000</BinaryValue>
+      <DecimalValue>13040</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>_STRMSG</Name>
-      <HexValue>237c</HexValue>
-      <BinaryValue>0010001101111100</BinaryValue>
-      <DecimalValue>9084</DecimalValue>
+      <HexValue>2718</HexValue>
+      <BinaryValue>0010011100011000</BinaryValue>
+      <DecimalValue>10008</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>EXP2</Name>
-      <HexValue>1d24</HexValue>
-      <BinaryValue>0001110100100100</BinaryValue>
-      <DecimalValue>7460</DecimalValue>
+      <HexValue>1eac</HexValue>
+      <BinaryValue>0001111010101100</BinaryValue>
+      <DecimalValue>7852</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>EXPE</Name>
-      <HexValue>1d18</HexValue>
-      <BinaryValue>0001110100011000</BinaryValue>
-      <DecimalValue>7448</DecimalValue>
+      <HexValue>1ea0</HexValue>
+      <BinaryValue>0001111010100000</BinaryValue>
+      <DecimalValue>7840</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FLOAT_TO_INT</Name>
-      <HexValue>1bd6</HexValue>
-      <BinaryValue>0001101111010110</BinaryValue>
-      <DecimalValue>7126</DecimalValue>
+      <HexValue>1d5e</HexValue>
+      <BinaryValue>0001110101011110</BinaryValue>
+      <DecimalValue>7518</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FLOAT_TO_LONG</Name>
-      <HexValue>1c32</HexValue>
-      <BinaryValue>0001110000110010</BinaryValue>
-      <DecimalValue>7218</DecimalValue>
+      <HexValue>1dba</HexValue>
+      <BinaryValue>0001110110111010</BinaryValue>
+      <DecimalValue>7610</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FTOI_1</Name>
-      <HexValue>1c0e</HexValue>
-      <BinaryValue>0001110000001110</BinaryValue>
-      <DecimalValue>7182</DecimalValue>
+      <HexValue>1d96</HexValue>
+      <BinaryValue>0001110110010110</BinaryValue>
+      <DecimalValue>7574</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FTOI_E</Name>
-      <HexValue>1c28</HexValue>
-      <BinaryValue>0001110000101000</BinaryValue>
-      <DecimalValue>7208</DecimalValue>
+      <HexValue>1db0</HexValue>
+      <BinaryValue>0001110110110000</BinaryValue>
+      <DecimalValue>7600</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FTOL_1</Name>
-      <HexValue>1c72</HexValue>
-      <BinaryValue>0001110001110010</BinaryValue>
-      <DecimalValue>7282</DecimalValue>
+      <HexValue>1dfa</HexValue>
+      <BinaryValue>0001110111111010</BinaryValue>
+      <DecimalValue>7674</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>FTOL_E</Name>
-      <HexValue>1c8c</HexValue>
-      <BinaryValue>0001110010001100</BinaryValue>
-      <DecimalValue>7308</DecimalValue>
+      <HexValue>1e14</HexValue>
+      <BinaryValue>0001111000010100</BinaryValue>
+      <DecimalValue>7700</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>INIT_I</Name>
-      <HexValue>2048</HexValue>
-      <BinaryValue>0010000001001000</BinaryValue>
-      <DecimalValue>8264</DecimalValue>
+      <HexValue>234e</HexValue>
+      <BinaryValue>0010001101001110</BinaryValue>
+      <DecimalValue>9038</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>INIT_I_107</Name>
-      <HexValue>227a</HexValue>
-      <BinaryValue>0010001001111010</BinaryValue>
-      <DecimalValue>8826</DecimalValue>
+      <Name>INIT_I_108</Name>
+      <HexValue>2582</HexValue>
+      <BinaryValue>0010010110000010</BinaryValue>
+      <DecimalValue>9602</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>INIT_I_123</Name>
-      <HexValue>22de</HexValue>
-      <BinaryValue>0010001011011110</BinaryValue>
-      <DecimalValue>8926</DecimalValue>
+      <Name>INIT_I_124</Name>
+      <HexValue>25e6</HexValue>
+      <BinaryValue>0010010111100110</BinaryValue>
+      <DecimalValue>9702</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>INIT_I_150</Name>
-      <HexValue>2372</HexValue>
-      <BinaryValue>0010001101110010</BinaryValue>
-      <DecimalValue>9074</DecimalValue>
+      <Name>INIT_I_154</Name>
+      <HexValue>2680</HexValue>
+      <BinaryValue>0010011010000000</BinaryValue>
+      <DecimalValue>9856</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>INIT_I_176</Name>
+      <HexValue>2702</HexValue>
+      <BinaryValue>0010011100000010</BinaryValue>
+      <DecimalValue>9986</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>INIT_I_182</Name>
+      <HexValue>270e</HexValue>
+      <BinaryValue>0010011100001110</BinaryValue>
+      <DecimalValue>9998</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>INIT_I_2</Name>
-      <HexValue>2080</HexValue>
-      <BinaryValue>0010000010000000</BinaryValue>
-      <DecimalValue>8320</DecimalValue>
+      <HexValue>2386</HexValue>
+      <BinaryValue>0010001110000110</BinaryValue>
+      <DecimalValue>9094</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>INIT_I_67</Name>
-      <HexValue>21a8</HexValue>
-      <BinaryValue>0010000110101000</BinaryValue>
-      <DecimalValue>8616</DecimalValue>
+      <Name>INIT_I_68</Name>
+      <HexValue>24b0</HexValue>
+      <BinaryValue>0010010010110000</BinaryValue>
+      <DecimalValue>9392</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>INIT_I_83</Name>
-      <HexValue>220c</HexValue>
-      <BinaryValue>0010001000001100</BinaryValue>
-      <DecimalValue>8716</DecimalValue>
+      <Name>INIT_I_84</Name>
+      <HexValue>2514</HexValue>
+      <BinaryValue>0010010100010100</BinaryValue>
+      <DecimalValue>9492</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>INT_TO_FLOAT</Name>
-      <HexValue>1c9c</HexValue>
-      <BinaryValue>0001110010011100</BinaryValue>
-      <DecimalValue>7324</DecimalValue>
+      <HexValue>1e24</HexValue>
+      <BinaryValue>0001111000100100</BinaryValue>
+      <DecimalValue>7716</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>ITOF_1</Name>
-      <HexValue>1cb6</HexValue>
-      <BinaryValue>0001110010110110</BinaryValue>
-      <DecimalValue>7350</DecimalValue>
+      <HexValue>1e3e</HexValue>
+      <BinaryValue>0001111000111110</BinaryValue>
+      <DecimalValue>7742</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>ITOF_2</Name>
-      <HexValue>1cc4</HexValue>
-      <BinaryValue>0001110011000100</BinaryValue>
-      <DecimalValue>7364</DecimalValue>
+      <HexValue>1e4c</HexValue>
+      <BinaryValue>0001111001001100</BinaryValue>
+      <DecimalValue>7756</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>ITOF_3</Name>
-      <HexValue>1ccc</HexValue>
-      <BinaryValue>0001110011001100</BinaryValue>
-      <DecimalValue>7372</DecimalValue>
+      <HexValue>1e54</HexValue>
+      <BinaryValue>0001111001010100</BinaryValue>
+      <DecimalValue>7764</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -241,135 +255,135 @@
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_1</Name>
-      <HexValue>03d4</HexValue>
-      <BinaryValue>0000001111010100</BinaryValue>
-      <DecimalValue>980</DecimalValue>
+      <HexValue>0434</HexValue>
+      <BinaryValue>0000010000110100</BinaryValue>
+      <DecimalValue>1076</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_10</Name>
-      <HexValue>1b98</HexValue>
-      <BinaryValue>0001101110011000</BinaryValue>
-      <DecimalValue>7064</DecimalValue>
+      <HexValue>1d20</HexValue>
+      <BinaryValue>0001110100100000</BinaryValue>
+      <DecimalValue>7456</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_11</Name>
-      <HexValue>1bb0</HexValue>
-      <BinaryValue>0001101110110000</BinaryValue>
-      <DecimalValue>7088</DecimalValue>
+      <HexValue>1d38</HexValue>
+      <BinaryValue>0001110100111000</BinaryValue>
+      <DecimalValue>7480</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_12</Name>
-      <HexValue>1bc6</HexValue>
-      <BinaryValue>0001101111000110</BinaryValue>
-      <DecimalValue>7110</DecimalValue>
+      <HexValue>1d4e</HexValue>
+      <BinaryValue>0001110101001110</BinaryValue>
+      <DecimalValue>7502</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_2</Name>
-      <HexValue>045a</HexValue>
-      <BinaryValue>0000010001011010</BinaryValue>
-      <DecimalValue>1114</DecimalValue>
+      <HexValue>04ba</HexValue>
+      <BinaryValue>0000010010111010</BinaryValue>
+      <DecimalValue>1210</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_3</Name>
-      <HexValue>05f8</HexValue>
-      <BinaryValue>0000010111111000</BinaryValue>
-      <DecimalValue>1528</DecimalValue>
+      <HexValue>0668</HexValue>
+      <BinaryValue>0000011001101000</BinaryValue>
+      <DecimalValue>1640</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_4</Name>
-      <HexValue>0a76</HexValue>
-      <BinaryValue>0000101001110110</BinaryValue>
-      <DecimalValue>2678</DecimalValue>
+      <HexValue>0ae6</HexValue>
+      <BinaryValue>0000101011100110</BinaryValue>
+      <DecimalValue>2790</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_5</Name>
-      <HexValue>1576</HexValue>
-      <BinaryValue>0001010101110110</BinaryValue>
-      <DecimalValue>5494</DecimalValue>
+      <HexValue>16fa</HexValue>
+      <BinaryValue>0001011011111010</BinaryValue>
+      <DecimalValue>5882</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_6</Name>
-      <HexValue>19ac</HexValue>
-      <BinaryValue>0001100110101100</BinaryValue>
-      <DecimalValue>6572</DecimalValue>
+      <HexValue>1b34</HexValue>
+      <BinaryValue>0001101100110100</BinaryValue>
+      <DecimalValue>6964</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_7</Name>
-      <HexValue>1a5e</HexValue>
-      <BinaryValue>0001101001011110</BinaryValue>
-      <DecimalValue>6750</DecimalValue>
+      <HexValue>1be6</HexValue>
+      <BinaryValue>0001101111100110</BinaryValue>
+      <DecimalValue>7142</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_8</Name>
-      <HexValue>1b18</HexValue>
-      <BinaryValue>0001101100011000</BinaryValue>
-      <DecimalValue>6936</DecimalValue>
+      <HexValue>1ca0</HexValue>
+      <BinaryValue>0001110010100000</BinaryValue>
+      <DecimalValue>7328</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LABEL_9</Name>
-      <HexValue>1b82</HexValue>
-      <BinaryValue>0001101110000010</BinaryValue>
-      <DecimalValue>7042</DecimalValue>
+      <HexValue>1d0a</HexValue>
+      <BinaryValue>0001110100001010</BinaryValue>
+      <DecimalValue>7434</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LOG_1</Name>
-      <HexValue>1e12</HexValue>
-      <BinaryValue>0001111000010010</BinaryValue>
-      <DecimalValue>7698</DecimalValue>
+      <HexValue>1f9a</HexValue>
+      <BinaryValue>0001111110011010</BinaryValue>
+      <DecimalValue>8090</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LOG_2</Name>
-      <HexValue>1e1e</HexValue>
-      <BinaryValue>0001111000011110</BinaryValue>
-      <DecimalValue>7710</DecimalValue>
+      <HexValue>1fa6</HexValue>
+      <BinaryValue>0001111110100110</BinaryValue>
+      <DecimalValue>8102</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LOG2</Name>
-      <HexValue>1df4</HexValue>
-      <BinaryValue>0001110111110100</BinaryValue>
-      <DecimalValue>7668</DecimalValue>
+      <HexValue>1f7c</HexValue>
+      <BinaryValue>0001111101111100</BinaryValue>
+      <DecimalValue>8060</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LONG_TO_FLOAT</Name>
-      <HexValue>1cce</HexValue>
-      <BinaryValue>0001110011001110</BinaryValue>
-      <DecimalValue>7374</DecimalValue>
+      <HexValue>1e56</HexValue>
+      <BinaryValue>0001111001010110</BinaryValue>
+      <DecimalValue>7766</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LTOF_1</Name>
-      <HexValue>1cfa</HexValue>
-      <BinaryValue>0001110011111010</BinaryValue>
-      <DecimalValue>7418</DecimalValue>
+      <HexValue>1e82</HexValue>
+      <BinaryValue>0001111010000010</BinaryValue>
+      <DecimalValue>7810</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LTOF_2</Name>
-      <HexValue>1d0e</HexValue>
-      <BinaryValue>0001110100001110</BinaryValue>
-      <DecimalValue>7438</DecimalValue>
+      <HexValue>1e96</HexValue>
+      <BinaryValue>0001111010010110</BinaryValue>
+      <DecimalValue>7830</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>LTOF_3</Name>
-      <HexValue>1d16</HexValue>
-      <BinaryValue>0001110100010110</BinaryValue>
-      <DecimalValue>7446</DecimalValue>
+      <HexValue>1e9e</HexValue>
+      <BinaryValue>0001111010011110</BinaryValue>
+      <DecimalValue>7838</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -380,59 +394,73 @@
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1011</Name>
-      <HexValue>0d08</HexValue>
-      <BinaryValue>0000110100001000</BinaryValue>
-      <DecimalValue>3336</DecimalValue>
+      <Name>MAIN_1008</Name>
+      <HexValue>0cac</HexValue>
+      <BinaryValue>0000110010101100</BinaryValue>
+      <DecimalValue>3244</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1019</Name>
+      <Name>MAIN_1034</Name>
       <HexValue>0d20</HexValue>
       <BinaryValue>0000110100100000</BinaryValue>
       <DecimalValue>3360</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1055</Name>
-      <HexValue>0d86</HexValue>
-      <BinaryValue>0000110110000110</BinaryValue>
-      <DecimalValue>3462</DecimalValue>
+      <Name>MAIN_1046</Name>
+      <HexValue>0d42</HexValue>
+      <BinaryValue>0000110101000010</BinaryValue>
+      <DecimalValue>3394</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1072</Name>
-      <HexValue>0dac</HexValue>
-      <BinaryValue>0000110110101100</BinaryValue>
-      <DecimalValue>3500</DecimalValue>
+      <Name>MAIN_1063</Name>
+      <HexValue>0d78</HexValue>
+      <BinaryValue>0000110101111000</BinaryValue>
+      <DecimalValue>3448</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1088</Name>
-      <HexValue>0dd6</HexValue>
-      <BinaryValue>0000110111010110</BinaryValue>
-      <DecimalValue>3542</DecimalValue>
+      <Name>MAIN_1071</Name>
+      <HexValue>0d90</HexValue>
+      <BinaryValue>0000110110010000</BinaryValue>
+      <DecimalValue>3472</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1093</Name>
-      <HexValue>0de0</HexValue>
-      <BinaryValue>0000110111100000</BinaryValue>
-      <DecimalValue>3552</DecimalValue>
+      <Name>MAIN_1107</Name>
+      <HexValue>0df6</HexValue>
+      <BinaryValue>0000110111110110</BinaryValue>
+      <DecimalValue>3574</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1113</Name>
-      <HexValue>0e4e</HexValue>
-      <BinaryValue>0000111001001110</BinaryValue>
-      <DecimalValue>3662</DecimalValue>
+      <Name>MAIN_1124</Name>
+      <HexValue>0e1c</HexValue>
+      <BinaryValue>0000111000011100</BinaryValue>
+      <DecimalValue>3612</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1192</Name>
-      <HexValue>0f4c</HexValue>
-      <BinaryValue>0000111101001100</BinaryValue>
-      <DecimalValue>3916</DecimalValue>
+      <Name>MAIN_1140</Name>
+      <HexValue>0e46</HexValue>
+      <BinaryValue>0000111001000110</BinaryValue>
+      <DecimalValue>3654</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_1145</Name>
+      <HexValue>0e50</HexValue>
+      <BinaryValue>0000111001010000</BinaryValue>
+      <DecimalValue>3664</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_1165</Name>
+      <HexValue>0ebe</HexValue>
+      <BinaryValue>0000111010111110</BinaryValue>
+      <DecimalValue>3774</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -443,101 +471,108 @@
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1224</Name>
-      <HexValue>0fae</HexValue>
-      <BinaryValue>0000111110101110</BinaryValue>
-      <DecimalValue>4014</DecimalValue>
+      <Name>MAIN_1223</Name>
+      <HexValue>0f6c</HexValue>
+      <BinaryValue>0000111101101100</BinaryValue>
+      <DecimalValue>3948</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1241</Name>
-      <HexValue>0ff8</HexValue>
-      <BinaryValue>0000111111111000</BinaryValue>
-      <DecimalValue>4088</DecimalValue>
+      <Name>MAIN_1252</Name>
+      <HexValue>0fe4</HexValue>
+      <BinaryValue>0000111111100100</BinaryValue>
+      <DecimalValue>4068</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1273</Name>
-      <HexValue>105a</HexValue>
-      <BinaryValue>0001000001011010</BinaryValue>
-      <DecimalValue>4186</DecimalValue>
+      <Name>MAIN_1284</Name>
+      <HexValue>1046</HexValue>
+      <BinaryValue>0001000001000110</BinaryValue>
+      <DecimalValue>4166</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1305</Name>
-      <HexValue>10bc</HexValue>
-      <BinaryValue>0001000010111100</BinaryValue>
-      <DecimalValue>4284</DecimalValue>
+      <Name>MAIN_1316</Name>
+      <HexValue>10a8</HexValue>
+      <BinaryValue>0001000010101000</BinaryValue>
+      <DecimalValue>4264</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1325</Name>
-      <HexValue>110a</HexValue>
-      <BinaryValue>0001000100001010</BinaryValue>
-      <DecimalValue>4362</DecimalValue>
+      <Name>MAIN_1333</Name>
+      <HexValue>10f2</HexValue>
+      <BinaryValue>0001000011110010</BinaryValue>
+      <DecimalValue>4338</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1353</Name>
-      <HexValue>1184</HexValue>
-      <BinaryValue>0001000110000100</BinaryValue>
-      <DecimalValue>4484</DecimalValue>
+      <Name>MAIN_1365</Name>
+      <HexValue>1154</HexValue>
+      <BinaryValue>0001000101010100</BinaryValue>
+      <DecimalValue>4436</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1364</Name>
-      <HexValue>1194</HexValue>
-      <BinaryValue>0001000110010100</BinaryValue>
-      <DecimalValue>4500</DecimalValue>
+      <Name>MAIN_1397</Name>
+      <HexValue>11b6</HexValue>
+      <BinaryValue>0001000110110110</BinaryValue>
+      <DecimalValue>4534</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1433</Name>
-      <HexValue>12e0</HexValue>
-      <BinaryValue>0001001011100000</BinaryValue>
-      <DecimalValue>4832</DecimalValue>
+      <Name>MAIN_1417</Name>
+      <HexValue>1204</HexValue>
+      <BinaryValue>0001001000000100</BinaryValue>
+      <DecimalValue>4612</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1453</Name>
-      <HexValue>1328</HexValue>
-      <BinaryValue>0001001100101000</BinaryValue>
-      <DecimalValue>4904</DecimalValue>
+      <Name>MAIN_1456</Name>
+      <HexValue>128e</HexValue>
+      <BinaryValue>0001001010001110</BinaryValue>
+      <DecimalValue>4750</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1463</Name>
-      <HexValue>1354</HexValue>
-      <BinaryValue>0001001101010100</BinaryValue>
-      <DecimalValue>4948</DecimalValue>
+      <Name>MAIN_1485</Name>
+      <HexValue>1306</HexValue>
+      <BinaryValue>0001001100000110</BinaryValue>
+      <DecimalValue>4870</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1483</Name>
-      <HexValue>139c</HexValue>
-      <BinaryValue>0001001110011100</BinaryValue>
-      <DecimalValue>5020</DecimalValue>
+      <Name>MAIN_1496</Name>
+      <HexValue>1316</HexValue>
+      <BinaryValue>0001001100010110</BinaryValue>
+      <DecimalValue>4886</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1503</Name>
-      <HexValue>13e4</HexValue>
-      <BinaryValue>0001001111100100</BinaryValue>
-      <DecimalValue>5092</DecimalValue>
+      <Name>MAIN_1565</Name>
+      <HexValue>1462</HexValue>
+      <BinaryValue>0001010001100010</BinaryValue>
+      <DecimalValue>5218</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1513</Name>
-      <HexValue>1410</HexValue>
-      <BinaryValue>0001010000010000</BinaryValue>
-      <DecimalValue>5136</DecimalValue>
+      <Name>MAIN_1585</Name>
+      <HexValue>14aa</HexValue>
+      <BinaryValue>0001010010101010</BinaryValue>
+      <DecimalValue>5290</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1517</Name>
-      <HexValue>1416</HexValue>
-      <BinaryValue>0001010000010110</BinaryValue>
-      <DecimalValue>5142</DecimalValue>
+      <Name>MAIN_1595</Name>
+      <HexValue>14d6</HexValue>
+      <BinaryValue>0001010011010110</BinaryValue>
+      <DecimalValue>5334</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_1615</Name>
+      <HexValue>151e</HexValue>
+      <BinaryValue>0001010100011110</BinaryValue>
+      <DecimalValue>5406</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -548,136 +583,129 @@
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1632</Name>
-      <HexValue>15a8</HexValue>
-      <BinaryValue>0001010110101000</BinaryValue>
-      <DecimalValue>5544</DecimalValue>
+      <Name>MAIN_1635</Name>
+      <HexValue>1566</HexValue>
+      <BinaryValue>0001010101100110</BinaryValue>
+      <DecimalValue>5478</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1643</Name>
-      <HexValue>15b8</HexValue>
-      <BinaryValue>0001010110111000</BinaryValue>
-      <DecimalValue>5560</DecimalValue>
+      <Name>MAIN_1645</Name>
+      <HexValue>1592</HexValue>
+      <BinaryValue>0001010110010010</BinaryValue>
+      <DecimalValue>5522</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1663</Name>
-      <HexValue>162a</HexValue>
-      <BinaryValue>0001011000101010</BinaryValue>
-      <DecimalValue>5674</DecimalValue>
+      <Name>MAIN_1649</Name>
+      <HexValue>1598</HexValue>
+      <BinaryValue>0001010110011000</BinaryValue>
+      <DecimalValue>5528</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1670</Name>
-      <HexValue>163a</HexValue>
-      <BinaryValue>0001011000111010</BinaryValue>
-      <DecimalValue>5690</DecimalValue>
+      <Name>MAIN_168</Name>
+      <HexValue>021e</HexValue>
+      <BinaryValue>0000001000011110</BinaryValue>
+      <DecimalValue>542</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_169</Name>
-      <HexValue>0224</HexValue>
-      <BinaryValue>0000001000100100</BinaryValue>
-      <DecimalValue>548</DecimalValue>
+      <Name>MAIN_1764</Name>
+      <HexValue>172c</HexValue>
+      <BinaryValue>0001011100101100</BinaryValue>
+      <DecimalValue>5932</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1692</Name>
-      <HexValue>1666</HexValue>
-      <BinaryValue>0001011001100110</BinaryValue>
-      <DecimalValue>5734</DecimalValue>
+      <Name>MAIN_1775</Name>
+      <HexValue>173c</HexValue>
+      <BinaryValue>0001011100111100</BinaryValue>
+      <DecimalValue>5948</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1703</Name>
-      <HexValue>1676</HexValue>
-      <BinaryValue>0001011001110110</BinaryValue>
-      <DecimalValue>5750</DecimalValue>
+      <Name>MAIN_1795</Name>
+      <HexValue>17ae</HexValue>
+      <BinaryValue>0001011110101110</BinaryValue>
+      <DecimalValue>6062</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1728</Name>
-      <HexValue>16d0</HexValue>
-      <BinaryValue>0001011011010000</BinaryValue>
-      <DecimalValue>5840</DecimalValue>
+      <Name>MAIN_1802</Name>
+      <HexValue>17be</HexValue>
+      <BinaryValue>0001011110111110</BinaryValue>
+      <DecimalValue>6078</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1748</Name>
-      <HexValue>1718</HexValue>
-      <BinaryValue>0001011100011000</BinaryValue>
-      <DecimalValue>5912</DecimalValue>
+      <Name>MAIN_1824</Name>
+      <HexValue>17ec</HexValue>
+      <BinaryValue>0001011111101100</BinaryValue>
+      <DecimalValue>6124</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1768</Name>
-      <HexValue>1760</HexValue>
-      <BinaryValue>0001011101100000</BinaryValue>
-      <DecimalValue>5984</DecimalValue>
+      <Name>MAIN_1835</Name>
+      <HexValue>17fc</HexValue>
+      <BinaryValue>0001011111111100</BinaryValue>
+      <DecimalValue>6140</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1778</Name>
-      <HexValue>178c</HexValue>
-      <BinaryValue>0001011110001100</BinaryValue>
-      <DecimalValue>6028</DecimalValue>
+      <Name>MAIN_1860</Name>
+      <HexValue>1856</HexValue>
+      <BinaryValue>0001100001010110</BinaryValue>
+      <DecimalValue>6230</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1798</Name>
-      <HexValue>17d4</HexValue>
-      <BinaryValue>0001011111010100</BinaryValue>
-      <DecimalValue>6100</DecimalValue>
+      <Name>MAIN_1880</Name>
+      <HexValue>189e</HexValue>
+      <BinaryValue>0001100010011110</BinaryValue>
+      <DecimalValue>6302</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1818</Name>
-      <HexValue>181c</HexValue>
-      <BinaryValue>0001100000011100</BinaryValue>
-      <DecimalValue>6172</DecimalValue>
+      <Name>MAIN_1900</Name>
+      <HexValue>18e6</HexValue>
+      <BinaryValue>0001100011100110</BinaryValue>
+      <DecimalValue>6374</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1828</Name>
-      <HexValue>1848</HexValue>
-      <BinaryValue>0001100001001000</BinaryValue>
-      <DecimalValue>6216</DecimalValue>
+      <Name>MAIN_1910</Name>
+      <HexValue>1912</HexValue>
+      <BinaryValue>0001100100010010</BinaryValue>
+      <DecimalValue>6418</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_1837</Name>
-      <HexValue>185c</HexValue>
-      <BinaryValue>0001100001011100</BinaryValue>
-      <DecimalValue>6236</DecimalValue>
+      <Name>MAIN_1930</Name>
+      <HexValue>195a</HexValue>
+      <BinaryValue>0001100101011010</BinaryValue>
+      <DecimalValue>6490</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_1950</Name>
+      <HexValue>19a2</HexValue>
+      <BinaryValue>0001100110100010</BinaryValue>
+      <DecimalValue>6562</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_1960</Name>
+      <HexValue>19ce</HexValue>
+      <BinaryValue>0001100111001110</BinaryValue>
+      <DecimalValue>6606</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>MAIN_1969</Name>
-      <HexValue>1a2a</HexValue>
-      <BinaryValue>0001101000101010</BinaryValue>
-      <DecimalValue>6698</DecimalValue>
-      <isLabel>true</isLabel>
-    </DasmSymbol>
-    <DasmSymbol>
-      <Name>MAIN_1980</Name>
-      <HexValue>1a3a</HexValue>
-      <BinaryValue>0001101000111010</BinaryValue>
-      <DecimalValue>6714</DecimalValue>
-      <isLabel>true</isLabel>
-    </DasmSymbol>
-    <DasmSymbol>
-      <Name>MAIN_1983</Name>
-      <HexValue>1a44</HexValue>
-      <BinaryValue>0001101001000100</BinaryValue>
-      <DecimalValue>6724</DecimalValue>
-      <isLabel>true</isLabel>
-    </DasmSymbol>
-    <DasmSymbol>
-      <Name>MAIN_1991</Name>
-      <HexValue>1a6a</HexValue>
-      <BinaryValue>0001101001101010</BinaryValue>
-      <DecimalValue>6762</DecimalValue>
+      <HexValue>19e2</HexValue>
+      <BinaryValue>0001100111100010</BinaryValue>
+      <DecimalValue>6626</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -688,192 +716,227 @@
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_2036</Name>
-      <HexValue>1ad0</HexValue>
-      <BinaryValue>0001101011010000</BinaryValue>
-      <DecimalValue>6864</DecimalValue>
+      <Name>MAIN_2101</Name>
+      <HexValue>1bb2</HexValue>
+      <BinaryValue>0001101110110010</BinaryValue>
+      <DecimalValue>7090</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_2065</Name>
-      <HexValue>1b24</HexValue>
-      <BinaryValue>0001101100100100</BinaryValue>
-      <DecimalValue>6948</DecimalValue>
+      <Name>MAIN_2112</Name>
+      <HexValue>1bc2</HexValue>
+      <BinaryValue>0001101111000010</BinaryValue>
+      <DecimalValue>7106</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_2068</Name>
-      <HexValue>1b28</HexValue>
-      <BinaryValue>0001101100101000</BinaryValue>
-      <DecimalValue>6952</DecimalValue>
+      <Name>MAIN_2115</Name>
+      <HexValue>1bcc</HexValue>
+      <BinaryValue>0001101111001100</BinaryValue>
+      <DecimalValue>7116</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_265</Name>
-      <HexValue>037e</HexValue>
-      <BinaryValue>0000001101111110</BinaryValue>
-      <DecimalValue>894</DecimalValue>
+      <Name>MAIN_2123</Name>
+      <HexValue>1bf2</HexValue>
+      <BinaryValue>0001101111110010</BinaryValue>
+      <DecimalValue>7154</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_309</Name>
-      <HexValue>0432</HexValue>
-      <BinaryValue>0000010000110010</BinaryValue>
-      <DecimalValue>1074</DecimalValue>
+      <Name>MAIN_214</Name>
+      <HexValue>0280</HexValue>
+      <BinaryValue>0000001010000000</BinaryValue>
+      <DecimalValue>640</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_319</Name>
-      <HexValue>046a</HexValue>
-      <BinaryValue>0000010001101010</BinaryValue>
-      <DecimalValue>1130</DecimalValue>
+      <Name>MAIN_2168</Name>
+      <HexValue>1c58</HexValue>
+      <BinaryValue>0001110001011000</BinaryValue>
+      <DecimalValue>7256</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_368</Name>
-      <HexValue>04e2</HexValue>
-      <BinaryValue>0000010011100010</BinaryValue>
-      <DecimalValue>1250</DecimalValue>
+      <Name>MAIN_2197</Name>
+      <HexValue>1cac</HexValue>
+      <BinaryValue>0001110010101100</BinaryValue>
+      <DecimalValue>7340</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_383</Name>
-      <HexValue>050e</HexValue>
-      <BinaryValue>0000010100001110</BinaryValue>
-      <DecimalValue>1294</DecimalValue>
+      <Name>MAIN_220</Name>
+      <HexValue>028c</HexValue>
+      <BinaryValue>0000001010001100</BinaryValue>
+      <DecimalValue>652</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_406</Name>
-      <HexValue>0548</HexValue>
-      <BinaryValue>0000010101001000</BinaryValue>
-      <DecimalValue>1352</DecimalValue>
+      <Name>MAIN_2200</Name>
+      <HexValue>1cb0</HexValue>
+      <BinaryValue>0001110010110000</BinaryValue>
+      <DecimalValue>7344</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_421</Name>
-      <HexValue>056a</HexValue>
-      <BinaryValue>0000010101101010</BinaryValue>
-      <DecimalValue>1386</DecimalValue>
+      <Name>MAIN_310</Name>
+      <HexValue>03de</HexValue>
+      <BinaryValue>0000001111011110</BinaryValue>
+      <DecimalValue>990</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_427</Name>
-      <HexValue>057a</HexValue>
-      <BinaryValue>0000010101111010</BinaryValue>
-      <DecimalValue>1402</DecimalValue>
+      <Name>MAIN_354</Name>
+      <HexValue>0492</HexValue>
+      <BinaryValue>0000010010010010</BinaryValue>
+      <DecimalValue>1170</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_430</Name>
-      <HexValue>0584</HexValue>
-      <BinaryValue>0000010110000100</BinaryValue>
-      <DecimalValue>1412</DecimalValue>
+      <Name>MAIN_364</Name>
+      <HexValue>04ca</HexValue>
+      <BinaryValue>0000010011001010</BinaryValue>
+      <DecimalValue>1226</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_452</Name>
-      <HexValue>05be</HexValue>
-      <BinaryValue>0000010110111110</BinaryValue>
-      <DecimalValue>1470</DecimalValue>
+      <Name>MAIN_420</Name>
+      <HexValue>0552</HexValue>
+      <BinaryValue>0000010101010010</BinaryValue>
+      <DecimalValue>1362</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_494</Name>
-      <HexValue>0660</HexValue>
-      <BinaryValue>0000011001100000</BinaryValue>
-      <DecimalValue>1632</DecimalValue>
+      <Name>MAIN_435</Name>
+      <HexValue>057e</HexValue>
+      <BinaryValue>0000010101111110</BinaryValue>
+      <DecimalValue>1406</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_518</Name>
-      <HexValue>06be</HexValue>
-      <BinaryValue>0000011010111110</BinaryValue>
-      <DecimalValue>1726</DecimalValue>
+      <Name>MAIN_458</Name>
+      <HexValue>05b8</HexValue>
+      <BinaryValue>0000010110111000</BinaryValue>
+      <DecimalValue>1464</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_539</Name>
-      <HexValue>0712</HexValue>
-      <BinaryValue>0000011100010010</BinaryValue>
-      <DecimalValue>1810</DecimalValue>
+      <Name>MAIN_473</Name>
+      <HexValue>05da</HexValue>
+      <BinaryValue>0000010111011010</BinaryValue>
+      <DecimalValue>1498</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_566</Name>
-      <HexValue>0774</HexValue>
-      <BinaryValue>0000011101110100</BinaryValue>
-      <DecimalValue>1908</DecimalValue>
+      <Name>MAIN_479</Name>
+      <HexValue>05ea</HexValue>
+      <BinaryValue>0000010111101010</BinaryValue>
+      <DecimalValue>1514</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_590</Name>
-      <HexValue>07d2</HexValue>
-      <BinaryValue>0000011111010010</BinaryValue>
-      <DecimalValue>2002</DecimalValue>
+      <Name>MAIN_482</Name>
+      <HexValue>05f4</HexValue>
+      <BinaryValue>0000010111110100</BinaryValue>
+      <DecimalValue>1524</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_611</Name>
-      <HexValue>081a</HexValue>
-      <BinaryValue>0000100000011010</BinaryValue>
-      <DecimalValue>2074</DecimalValue>
+      <Name>MAIN_504</Name>
+      <HexValue>062e</HexValue>
+      <BinaryValue>0000011000101110</BinaryValue>
+      <DecimalValue>1582</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_638</Name>
-      <HexValue>0870</HexValue>
-      <BinaryValue>0000100001110000</BinaryValue>
-      <DecimalValue>2160</DecimalValue>
+      <Name>MAIN_546</Name>
+      <HexValue>06d0</HexValue>
+      <BinaryValue>0000011011010000</BinaryValue>
+      <DecimalValue>1744</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_662</Name>
-      <HexValue>08c2</HexValue>
-      <BinaryValue>0000100011000010</BinaryValue>
-      <DecimalValue>2242</DecimalValue>
+      <Name>MAIN_570</Name>
+      <HexValue>072e</HexValue>
+      <BinaryValue>0000011100101110</BinaryValue>
+      <DecimalValue>1838</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_683</Name>
-      <HexValue>090a</HexValue>
-      <BinaryValue>0000100100001010</BinaryValue>
-      <DecimalValue>2314</DecimalValue>
+      <Name>MAIN_591</Name>
+      <HexValue>0782</HexValue>
+      <BinaryValue>0000011110000010</BinaryValue>
+      <DecimalValue>1922</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_711</Name>
-      <HexValue>0960</HexValue>
-      <BinaryValue>0000100101100000</BinaryValue>
-      <DecimalValue>2400</DecimalValue>
+      <Name>MAIN_618</Name>
+      <HexValue>07e4</HexValue>
+      <BinaryValue>0000011111100100</BinaryValue>
+      <DecimalValue>2020</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_736</Name>
-      <HexValue>09b2</HexValue>
-      <BinaryValue>0000100110110010</BinaryValue>
-      <DecimalValue>2482</DecimalValue>
+      <Name>MAIN_642</Name>
+      <HexValue>0842</HexValue>
+      <BinaryValue>0000100001000010</BinaryValue>
+      <DecimalValue>2114</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_754</Name>
-      <HexValue>0a02</HexValue>
-      <BinaryValue>0000101000000010</BinaryValue>
-      <DecimalValue>2562</DecimalValue>
+      <Name>MAIN_663</Name>
+      <HexValue>088a</HexValue>
+      <BinaryValue>0000100010001010</BinaryValue>
+      <DecimalValue>2186</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_776</Name>
-      <HexValue>0a3c</HexValue>
-      <BinaryValue>0000101000111100</BinaryValue>
-      <DecimalValue>2620</DecimalValue>
+      <Name>MAIN_690</Name>
+      <HexValue>08e0</HexValue>
+      <BinaryValue>0000100011100000</BinaryValue>
+      <DecimalValue>2272</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_827</Name>
-      <HexValue>0ae8</HexValue>
-      <BinaryValue>0000101011101000</BinaryValue>
-      <DecimalValue>2792</DecimalValue>
+      <Name>MAIN_714</Name>
+      <HexValue>0932</HexValue>
+      <BinaryValue>0000100100110010</BinaryValue>
+      <DecimalValue>2354</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_735</Name>
+      <HexValue>097a</HexValue>
+      <BinaryValue>0000100101111010</BinaryValue>
+      <DecimalValue>2426</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_763</Name>
+      <HexValue>09d0</HexValue>
+      <BinaryValue>0000100111010000</BinaryValue>
+      <DecimalValue>2512</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_788</Name>
+      <HexValue>0a22</HexValue>
+      <BinaryValue>0000101000100010</BinaryValue>
+      <DecimalValue>2594</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_806</Name>
+      <HexValue>0a72</HexValue>
+      <BinaryValue>0000101001110010</BinaryValue>
+      <DecimalValue>2674</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>MAIN_828</Name>
+      <HexValue>0aac</HexValue>
+      <BinaryValue>0000101010101100</BinaryValue>
+      <DecimalValue>2732</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -884,115 +947,108 @@
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_846</Name>
-      <HexValue>0b1a</HexValue>
-      <BinaryValue>0000101100011010</BinaryValue>
-      <DecimalValue>2842</DecimalValue>
+      <Name>MAIN_879</Name>
+      <HexValue>0b58</HexValue>
+      <BinaryValue>0000101101011000</BinaryValue>
+      <DecimalValue>2904</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_864</Name>
-      <HexValue>0b4a</HexValue>
-      <BinaryValue>0000101101001010</BinaryValue>
-      <DecimalValue>2890</DecimalValue>
+      <Name>MAIN_898</Name>
+      <HexValue>0b8a</HexValue>
+      <BinaryValue>0000101110001010</BinaryValue>
+      <DecimalValue>2954</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_883</Name>
-      <HexValue>0b7c</HexValue>
-      <BinaryValue>0000101101111100</BinaryValue>
-      <DecimalValue>2940</DecimalValue>
+      <Name>MAIN_916</Name>
+      <HexValue>0bba</HexValue>
+      <BinaryValue>0000101110111010</BinaryValue>
+      <DecimalValue>3002</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_901</Name>
-      <HexValue>0bac</HexValue>
-      <BinaryValue>0000101110101100</BinaryValue>
-      <DecimalValue>2988</DecimalValue>
+      <Name>MAIN_935</Name>
+      <HexValue>0bec</HexValue>
+      <BinaryValue>0000101111101100</BinaryValue>
+      <DecimalValue>3052</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_920</Name>
-      <HexValue>0bde</HexValue>
-      <BinaryValue>0000101111011110</BinaryValue>
-      <DecimalValue>3038</DecimalValue>
+      <Name>MAIN_953</Name>
+      <HexValue>0c1c</HexValue>
+      <BinaryValue>0000110000011100</BinaryValue>
+      <DecimalValue>3100</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_939</Name>
-      <HexValue>0c0e</HexValue>
-      <BinaryValue>0000110000001110</BinaryValue>
-      <DecimalValue>3086</DecimalValue>
+      <Name>MAIN_972</Name>
+      <HexValue>0c4e</HexValue>
+      <BinaryValue>0000110001001110</BinaryValue>
+      <DecimalValue>3150</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
-      <Name>MAIN_956</Name>
-      <HexValue>0c3c</HexValue>
-      <BinaryValue>0000110000111100</BinaryValue>
-      <DecimalValue>3132</DecimalValue>
-      <isLabel>true</isLabel>
-    </DasmSymbol>
-    <DasmSymbol>
-      <Name>MAIN_982</Name>
-      <HexValue>0cb0</HexValue>
-      <BinaryValue>0000110010110000</BinaryValue>
-      <DecimalValue>3248</DecimalValue>
-      <isLabel>true</isLabel>
-    </DasmSymbol>
-    <DasmSymbol>
-      <Name>MAIN_994</Name>
-      <HexValue>0cd2</HexValue>
-      <BinaryValue>0000110011010010</BinaryValue>
-      <DecimalValue>3282</DecimalValue>
+      <Name>MAIN_991</Name>
+      <HexValue>0c7e</HexValue>
+      <BinaryValue>0000110001111110</BinaryValue>
+      <DecimalValue>3198</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>POW</Name>
-      <HexValue>1dde</HexValue>
-      <BinaryValue>0001110111011110</BinaryValue>
-      <DecimalValue>7646</DecimalValue>
+      <HexValue>1f66</HexValue>
+      <BinaryValue>0001111101100110</BinaryValue>
+      <DecimalValue>8038</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>PRINT_NUM</Name>
-      <HexValue>1b68</HexValue>
-      <BinaryValue>0001101101101000</BinaryValue>
-      <DecimalValue>7016</DecimalValue>
+      <HexValue>1cf0</HexValue>
+      <BinaryValue>0001110011110000</BinaryValue>
+      <DecimalValue>7408</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>PRINT_UNUM</Name>
-      <HexValue>1ba8</HexValue>
-      <BinaryValue>0001101110101000</BinaryValue>
-      <DecimalValue>7080</DecimalValue>
+      <HexValue>1d30</HexValue>
+      <BinaryValue>0001110100110000</BinaryValue>
+      <DecimalValue>7472</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>PRINT_XY</Name>
-      <HexValue>1b46</HexValue>
-      <BinaryValue>0001101101000110</BinaryValue>
-      <DecimalValue>6982</DecimalValue>
+      <HexValue>1cce</HexValue>
+      <BinaryValue>0001110011001110</BinaryValue>
+      <DecimalValue>7374</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>PRTNUM</Name>
-      <HexValue>1b6e</HexValue>
-      <BinaryValue>0001101101101110</BinaryValue>
-      <DecimalValue>7022</DecimalValue>
+      <HexValue>1cf6</HexValue>
+      <BinaryValue>0001110011110110</BinaryValue>
+      <DecimalValue>7414</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>SET_SPRITE_IIIIII</Name>
-      <HexValue>1eca</HexValue>
-      <BinaryValue>0001111011001010</BinaryValue>
-      <DecimalValue>7882</DecimalValue>
+      <HexValue>2052</HexValue>
+      <BinaryValue>0010000001010010</BinaryValue>
+      <DecimalValue>8274</DecimalValue>
+      <isLabel>true</isLabel>
+    </DasmSymbol>
+    <DasmSymbol>
+      <Name>SET_SPRITE2_IIIIII</Name>
+      <HexValue>21d0</HexValue>
+      <BinaryValue>0010000111010000</BinaryValue>
+      <DecimalValue>8656</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
       <Name>SQRT</Name>
-      <HexValue>1e70</HexValue>
-      <BinaryValue>0001111001110000</BinaryValue>
-      <DecimalValue>7792</DecimalValue>
+      <HexValue>1ff8</HexValue>
+      <BinaryValue>0001111111111000</BinaryValue>
+      <DecimalValue>8184</DecimalValue>
       <isLabel>true</isLabel>
     </DasmSymbol>
     <DasmSymbol>
@@ -1004,9 +1060,9 @@
     </DasmSymbol>
     <DasmSymbol>
       <Name>XY_</Name>
-      <HexValue>1b44</HexValue>
-      <BinaryValue>0001101101000100</BinaryValue>
-      <DecimalValue>6980</DecimalValue>
+      <HexValue>1ccc</HexValue>
+      <BinaryValue>0001110011001100</BinaryValue>
+      <DecimalValue>7372</DecimalValue>
       <isLabel>false</isLabel>
     </DasmSymbol>
   </SymbolsList>

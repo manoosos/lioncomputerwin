@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.Xml.Serialization;
 using LionComputerEmulator;
 using LionWin.Properties;
 using System.Globalization;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using System.Drawing;
 using System.Threading;
 
@@ -23,23 +23,14 @@ namespace LionWin
         private Settings settings = Settings.Default;
 
         private static bool pauseEmulation = false;
-        Thread runthread;
+        Thread RunThread;
         private delegate void SetImageDlg(Bitmap img);
         private static Bitmap cmap = null;
 
         public frmMain()
         {
             InitializeComponent();
-
-            while (InstructionSet.OperationsList == null)
-            {
-                Application.DoEvents();
-            }
-            Disassembler.GenerateInstructionsText();
-            Display.InitScreen();
-            Sound.Init();
         }
-
 
         private void btnRun_Click(object sender, EventArgs e)
         {
@@ -56,15 +47,15 @@ namespace LionWin
             Cpu.isRunning = true;
 
             //execution loop
-            runthread = new Thread(doRun);
-            runthread.Start();
+            RunThread = new Thread(doRun);
+            RunThread.Start();
 
             while (Cpu.isRunning)
             {
                 Application.DoEvents();
                 System.Threading.Thread.Sleep(10);
             }
-            runthread.Join();
+            RunThread.Join();
 
             mnuOpenBIN.Enabled = true;
             btnRun.Enabled = true;
@@ -107,8 +98,8 @@ Stacktrace: {3}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.M
             finally
             {
                 Cpu.isRunning = false;
-                if (runthread != null)
-                    runthread.Abort();
+                if (RunThread != null)
+                    RunThread.Abort();
                 if (screenthread != null)
                     screenthread.Abort();
                 if (soundthread1 != null)
@@ -160,15 +151,15 @@ Stacktrace: {3}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.M
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Cpu.isRunning = false;
-            if (runthread != null)
-                runthread.Join();
+            if (RunThread != null)
+                RunThread.Join();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             Cpu.isRunning = false;
-            if (runthread != null)
-                runthread.Join();
+            if (RunThread != null)
+                RunThread.Join();
         }
 
         private void frmMain_KeyDown(object sender, KeyEventArgs e)
@@ -344,26 +335,16 @@ PC: {2}";
 
         }
 
-        private void mnuOpenBIN_Click(object sender, EventArgs e)
+        private bool OpenBin(string filename)
         {
-            pauseEmulation = true;
-            try
+            bool _ret = false;
+            filename = filename.Replace(".STATE", string.Empty).Replace(".VRAM", string.Empty);
+            if (!File.Exists(filename))
             {
-                btnReset.Enabled = false;
-                btnRun.Enabled = false;
-                btnStop.Enabled = false;
-
-                string fname;
-                if (string.IsNullOrEmpty(fname = OpenFile("BIN files|*.bin|All files|*.*")))
-                    return;
-
-                fname = fname.Replace(".STATE", string.Empty).Replace(".VRAM", string.Empty);
-                if (!File.Exists(fname))
-                {
-                    MessageBox.Show("Bin File Not Exists!");
-                    return;
-                }
-
+                MessageBox.Show(string.Format("{0}\r\nBin File Not Exists!", Path.GetFileName(filename)), "Λάθος", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
                 try
                 {
                     basProgAddress = 0;
@@ -371,21 +352,21 @@ PC: {2}";
                     if (File.Exists(Utilities.RegDumpFilename))
                         File.Delete(Utilities.RegDumpFilename);
 
-                    byte[] bin = File.ReadAllBytes(fname);
+                    byte[] bin = File.ReadAllBytes(filename);
                     Buffer.BlockCopy(bin, 0, Memory.Data, 0, bin.Length);
-                    if (File.Exists(fname.Replace(".bin", ".VRAM.bin")))
+                    if (File.Exists(filename.Replace(".bin", ".VRAM.bin")))
                     {
-                        bin = File.ReadAllBytes(fname.Replace(".bin", ".VRAM.bin"));
+                        bin = File.ReadAllBytes(filename.Replace(".bin", ".VRAM.bin"));
                         Buffer.BlockCopy(bin, 0, Display.Ram, 0, bin.Length);
                     }
 
-                    UpdateDasmSymbols(fname);
+                    UpdateDasmSymbols(filename);
 
                     List<string> dasmtext = Disassembler.Disassemble();
                     File.WriteAllLines("disassembly.lst", dasmtext, Encoding.ASCII);
-                    if (File.Exists(fname.Replace(".bin", ".STATE.bin")))
+                    if (File.Exists(filename.Replace(".bin", ".STATE.bin")))
                     {
-                        byte[] _state = File.ReadAllBytes(fname.Replace(".bin", ".STATE.bin"));
+                        byte[] _state = File.ReadAllBytes(filename.Replace(".bin", ".STATE.bin"));
                         int _bytndx = 0, _andx = 0;
                         if (_state.Length > 0)
                         {
@@ -411,6 +392,7 @@ PC: {2}";
                     {
                         Cpu.Reset();
                     }
+                    _ret = true;
                 }
                 catch (Exception ex)
                 {
@@ -420,6 +402,25 @@ PC: {2}";
 PC: {2}";
                     MessageBox.Show(string.Format(msg, ex.Message, ex.StackTrace, Convert.ToString(State.PC, 16).PadLeft(4, '0')), "Λάθος", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            return _ret;
+        }
+
+        private void mnuOpenBIN_Click(object sender, EventArgs e)
+        {
+            pauseEmulation = true;
+            try
+            {
+                btnReset.Enabled = false;
+                btnRun.Enabled = false;
+                btnStop.Enabled = false;
+
+                string fname;
+                if (string.IsNullOrEmpty(fname = OpenFile("BIN files|*.bin|All files|*.*")))
+                    return;
+
+                if (!OpenBin(fname))
+                    return;
 
                 btnReset.Enabled = true;
                 btnRun.Enabled = true;
@@ -507,6 +508,11 @@ PC: {2}";
         private void btnReset_Click(object sender, EventArgs e)
         {
             Cpu.Reset();
+            // mode0
+            Device.Port[Device.VIDEO_MODE] = 0;
+            // clear vram
+            byte[] zeroVram = new byte[Display.Ram.Length];
+            Buffer.BlockCopy(zeroVram, 0, Display.Ram, 0, Display.Ram.Length);
         }
 
         private string OpenFile(string filter, bool isBasic = false)
@@ -784,6 +790,23 @@ PC: {2}";
                     }
                     break;
             }
+        }
+
+        private void frmMain_Shown(object sender, EventArgs e)
+        {
+            if (InstructionSet.OperationsList == null)
+            {
+                MessageBox.Show("No Intruction Set!", "Fatal", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                Application.Exit();
+                return;
+            }
+            Disassembler.GenerateInstructionsText();
+            Display.InitScreen();
+            Sound.Init();
+            Clipboard.Clear();
+            bool _res = OpenBin("system.bin");
+            if (_res == true)
+                btnRun_Click(null, null);
         }
     }
 }

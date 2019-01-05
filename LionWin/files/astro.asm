@@ -62,7 +62,7 @@ MOV (dot_data), A7
 GADR A7, _rock_data
 MOV (rock_data), A7
 MOV (RAND), 197
-MOV (buffer), 2
+MOV (buffer), 0
 MOV (bt), 0
 GADR A7, _rockx
 MOV (rockx), A7
@@ -107,13 +107,13 @@ ADDI A3,12
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0051
 CMP A7,A4
-JRZ, main_2068
+JRZ, main_2200
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0071
 CMP A7,A4
-JRZ, main_2068
+JRZ, main_2200
   MOVI  A7 ,  $0001
 MOV (level), A7
   MOVI  A7 ,  $0000
@@ -146,7 +146,7 @@ MOVI A0,5
 INT 4
 PUSH $0001
 PUSH $002a
-GADR A7, _string_137
+GADR A7, _string_140
   MOV  A1 ,  A7
 POP A0
 POP A2
@@ -155,7 +155,7 @@ MOVI A0,5
 INT 4
 PUSH $0001
 PUSH $0001
-GADR A7, _string_138
+GADR A7, _string_141
   MOV  A1 ,  A7
 POP A0
 POP A2
@@ -177,7 +177,7 @@ ADDI A3,2
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0080
 CMP A7,A4
-JRGE main_169
+JRGE main_220
 PUSH $4200
 MOV	A3,A6
 ADDI A3,2
@@ -216,7 +216,7 @@ OUT.B A0,A1
 MOV (i), A7
 main_121:
   MOV  A7 ,  (i)
-  MOVI  A4 ,  $0008
+  MOVI  A4 ,  $000a
 CMP A7,A4
 JRGE main_163
 PUSH $4200
@@ -253,11 +253,53 @@ ADDI A5,1
 MOV (i), A7
 JR main_121
 main_163:
+  MOVI  A7 ,  $000a
+MOV (i), A7
+main_168:
+  MOV  A7 ,  (i)
+  MOV  A4 ,  $0014
+CMP A7,A4
+JRGE main_214
+PUSH $5200
+  MOV  A5 ,  (i)
+SUBI A5,10
+  MOV  A2 ,  A5
+  MOV  A1 ,  $0080
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,2
+  MOV  A7 ,  (A3)
+POP A4
+ADD A4, A7
+PUSH A4
+PUSH (rock_data)
+MOV	A3,A6
+ADDI A3,2
+  MOV  A4 ,  (A3)
+POP A7
+SLL A4,1
+ADD A7, A4
+  MOV  A7 ,  (A7)
+OR A7,$0011
+  MOV  A1 ,  A7
+POP A0
+OUT.B A0,A1
+  MOV  A5 ,  (i)
+ADDI A5,1
+  MOV  A7 ,  A5
+MOV (i), A7
+JR main_168
+main_214:
 MOV	A3,A6
 ADDI A3,2
 ADD (A3),1
 JR main_84
-main_169:
+main_220:
 PUSH $0000
 PUSH $0000
 PUSH $0001
@@ -322,9 +364,6 @@ BCLR A1,15
 MOV A3,A6
 ADDI A3,6
 MOV (A3),A7
-  MOV  A0 ,  $0014
-  MOVI  A1 ,  $0002
-OUT A0,A1
   MOV  A7 ,  $431a
   MOVI  A4 ,  $0000
 MOV A5, sx
@@ -373,11 +412,11 @@ MOV (A3), $0000
 OUT A0,A1
   MOVI  A7 ,  $0000
 MOV (i), A7
-main_265:
+main_310:
   MOV  A7 ,  (i)
   MOV  A4 ,  $0078
 CMP A7,A4
-JRGE main_309
+JRGE main_354
 PUSH $0000
   MOVI  A1 ,  $0007
 MOV A0,(RAND)
@@ -435,8 +474,8 @@ INT 4
 ADDI A5,1
   MOV  A7 ,  A5
 MOV (i), A7
-JR main_265
-main_309:
+JR main_310
+main_354:
   MOVI  A0 ,  $0000
   MOVI  A1 ,  $0003
 IN A3,24
@@ -456,17 +495,23 @@ JRXAB A0,Label_2
 MOV	A3,A6
 ADD A3,16
 MOV (A3), $012c
-main_319:
+main_364:
   MOV  A7 ,  (hit)
   MOVI  A4 ,  $0006
 CMP A7,A4
-JRGE main_1991
+JRGE main_2123
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0071
 CMP A7,A4
-JRZ, main_1991
+JRZ, main_2123
+MOV	A3,A6
+ADDI A3,12
+  MOV  A7 ,  (A3)
+  MOV  A4 ,  $0051
+CMP A7,A4
+JRZ, main_2123
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
@@ -484,7 +529,7 @@ ADD A3,24
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0044
 CMP A7,A4
-JRZ, main_368
+JRZ, main_420
 IN A1,22
 NOT A1
 AND A1,31
@@ -492,14 +537,14 @@ AND A1,31
 AND A7,$0008
   MOV  A7 ,  A7
 CMPI A7,0
-JRZ main_383
+JRZ main_435
 MOV	A3,A6
 ADDI A3,14
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0010
 CMP A7,A4
-JRLE main_383
-main_368:
+JRLE main_435
+main_420:
 MOV	A3,A6
 ADD A3,22
 MOV (A3), $0001
@@ -518,13 +563,13 @@ MOV (A3),A7
 MOV	A3,A6
 ADD A3,26
 MOV (A3), $0001
-main_383:
+main_435:
 MOV	A3,A6
 ADD A3,24
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0043
 CMP A7,A4
-JRZ, main_406
+JRZ, main_458
 IN A1,22
 NOT A1
 AND A1,31
@@ -532,14 +577,14 @@ AND A1,31
 AND A7,$0010
   MOV  A7 ,  A7
 CMPI A7,0
-JRZ main_430
+JRZ main_482
 MOV	A3,A6
 ADDI A3,14
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0010
 CMP A7,A4
-JRLE main_430
-main_406:
+JRLE main_482
+main_458:
 MOV	A3,A6
 ADD A3,22
 MOV (A3), $0001
@@ -547,12 +592,12 @@ MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRG main_421
+JRG main_473
 MOV	A3,A6
 ADDI A3,10
 MOV (A3), $0007
-JR main_427
-main_421:
+JR main_479
+main_473:
 MOV	A3,A6
 ADDI A3,10
   MOV  A5 ,  (A3)
@@ -561,17 +606,17 @@ SUBI A5,1
 MOV A3,A6
 ADDI A3,10
 MOV (A3),A7
-main_427:
+main_479:
 MOV	A3,A6
 ADD A3,26
 MOV (A3), $0001
-main_430:
+main_482:
 MOV	A3,A6
 ADD A3,24
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0041
 CMP A7,A4
-JRZ, main_452
+JRZ, main_504
 IN A1,22
 NOT A1
 AND A1,31
@@ -579,14 +624,14 @@ AND A1,31
 AND A7,$0004
   MOV  A7 ,  A7
 CMPI A7,0
-JRZ main_754
+JRZ main_806
 MOV	A3,A6
 ADDI A3,14
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0010
 CMP A7,A4
-JRLE main_754
-main_452:
+JRLE main_806
+main_504:
 MOV	A3,A6
 ADD A3,22
 MOV (A3), $0001
@@ -617,7 +662,7 @@ MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRNZ  main_494
+JRNZ  main_546
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -629,7 +674,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_754
+JRLE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -649,14 +694,14 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_494:
+JR main_806
+main_546:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_539
+JRNZ main_591
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -668,7 +713,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_518
+JRLE main_570
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -688,7 +733,7 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_518:
+main_570:
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -700,7 +745,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_754
+JRLE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -720,14 +765,14 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_539:
+JR main_806
+main_591:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0002
 CMP A7,A4
-JRNZ main_566
+JRNZ main_618
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -739,7 +784,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_754
+JRLE main_806
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -759,14 +804,14 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_566:
+JR main_806
+main_618:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0003
 CMP A7,A4
-JRNZ main_611
+JRNZ main_663
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -778,7 +823,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_590
+JRLE main_642
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -798,7 +843,7 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_590:
+main_642:
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -810,7 +855,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_754
+JRGE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -826,14 +871,14 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_611:
+JR main_806
+main_663:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0004
 CMP A7,A4
-JRNZ main_638
+JRNZ main_690
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -845,7 +890,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_754
+JRGE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -861,14 +906,14 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_638:
+JR main_806
+main_690:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0005
 CMP A7,A4
-JRNZ main_683
+JRNZ main_735
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -880,7 +925,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_662
+JRGE main_714
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -896,7 +941,7 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_662:
+main_714:
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -908,7 +953,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_754
+JRGE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -924,14 +969,14 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_683:
+JR main_806
+main_735:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0006
 CMP A7,A4
-JRNZ main_711
+JRNZ main_763
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -943,7 +988,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_754
+JRGE main_806
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -959,14 +1004,14 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_754
-main_711:
+JR main_806
+main_763:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0007
 CMP A7,A4
-JRNZ main_754
+JRNZ main_806
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -978,7 +1023,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_736
+JRGE main_788
 MOV A7, sdx
 PUSH (A7)
 ADDI A7,2
@@ -994,7 +1039,7 @@ MOV A5, sdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_736:
+main_788:
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -1006,7 +1051,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_754
+JRLE main_806
 MOV A7, sdy
 PUSH (A7)
 ADDI A7,2
@@ -1026,13 +1071,13 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_754:
+main_806:
 MOV	A3,A6
 ADD A3,24
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0020
 CMP A7,A4
-JRZ, main_776
+JRZ, main_828
 IN A1,22
 NOT A1
 AND A1,31
@@ -1040,14 +1085,14 @@ AND A1,31
 AND A7,$0001
   MOV  A7 ,  A7
 CMPI A7,0
-JRZ main_982
+JRZ main_1034
 MOV	A3,A6
 ADDI A3,14
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0012
 CMP A7,A4
-JRLE main_982
-main_776:
+JRLE main_1034
+main_828:
 MOV	A3,A6
 ADD A3,22
 MOV (A3), $0001
@@ -1102,7 +1147,7 @@ MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRNZ  main_827
+JRNZ  main_879
   MOV  A7 ,  $c0c0
   MOVI  A4 ,  $0000
 MOV A5, bdy
@@ -1115,14 +1160,14 @@ MOV A5, bdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_827:
+JR main_1008
+main_879:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_846
+JRNZ main_898
   MOV  A7 ,  $c040
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1135,14 +1180,14 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_846:
+JR main_1008
+main_898:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0002
 CMP A7,A4
-JRNZ main_864
+JRNZ main_916
   MOV  A7 ,  $c080
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1155,14 +1200,14 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_864:
+JR main_1008
+main_916:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0003
 CMP A7,A4
-JRNZ main_883
+JRNZ main_935
   MOV  A7 ,  $c040
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1175,14 +1220,14 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_883:
+JR main_1008
+main_935:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0004
 CMP A7,A4
-JRNZ main_901
+JRNZ main_953
   MOV  A7 ,  $40c0
   MOVI  A4 ,  $0000
 MOV A5, bdy
@@ -1195,14 +1240,14 @@ MOV A5, bdx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_901:
+JR main_1008
+main_953:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0005
 CMP A7,A4
-JRNZ main_920
+JRNZ main_972
   MOV  A7 ,  $4040
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1215,14 +1260,14 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_920:
+JR main_1008
+main_972:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0006
 CMP A7,A4
-JRNZ main_939
+JRNZ main_991
   MOV  A7 ,  $40c0
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1235,14 +1280,14 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_956
-main_939:
+JR main_1008
+main_991:
 MOV	A3,A6
 ADDI A3,10
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0007
 CMP A7,A4
-JRNZ main_956
+JRNZ main_1008
   MOV  A7 ,  $4040
   MOVI  A4 ,  $0000
 MOV A5, bdx
@@ -1255,7 +1300,7 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_956:
+main_1008:
 MOV A7, bdx
 PUSH (A7)
 ADDI A7,2
@@ -1306,20 +1351,20 @@ MOV A5, bdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_982:
+main_1034:
 MOV	A3,A6
 ADD A3,22
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_994
+JRNZ main_1046
 MOV	A3,A6
 ADDI A3,14
 MOV (A3), $0000
 MOV	A3,A6
 ADD A3,22
 MOV (A3), $0000
-main_994:
+main_1046:
 IN	A1,20
 BCLR A1,15
 PUSH A1
@@ -1336,7 +1381,7 @@ MOV	A3,A6
 ADDI A3,8
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRGE main_1011
+JRGE main_1063
 MOV	A3,A6
 ADDI A3,8
   MOV  A4 ,  (A3)
@@ -1345,23 +1390,23 @@ NEG A4
 MOV A3,A6
 ADDI A3,8
 MOV (A3),A7
-main_1011:
+main_1063:
 MOV	A3,A6
 ADD A3,26
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_1055
+JRNZ main_1107
 MOV	A3,A6
 ADDI A3,2
 MOV (A3), $0000
-main_1019:
+main_1071:
 MOV	A3,A6
 ADDI A3,2
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0080
 CMP A7,A4
-JRGE main_1055
+JRGE main_1107
 PUSH $4200
 MOV	A3,A6
 ADDI A3,2
@@ -1398,24 +1443,24 @@ OUT.B A0,A1
 MOV	A3,A6
 ADDI A3,2
 ADD (A3),1
-JR main_1019
-main_1055:
+JR main_1071
+main_1107:
 MOV	A3,A6
 ADDI A3,8
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0009
 CMP A7,A4
-JRLE main_1983
+JRLE main_2115
 MOV	A3,A6
 ADDI A3,14
   MOV  A7 ,  (A3)
   MOV  A4 ,  $001e
 CMP A7,A4
-JRGE main_1072
+JRGE main_1124
 MOV	A3,A6
 ADDI A3,14
 ADD (A3),1
-main_1072:
+main_1124:
 IN	A1,20
 BCLR A1,15
   MOV  A7 ,  A1
@@ -1426,16 +1471,16 @@ MOV	A3,A6
 ADD A3,16
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRNZ  main_1088
+JRNZ  main_1140
 MOV	A3,A6
 ADD A3,18
 MOV (A3), $ffff
-JR main_1093
-main_1088:
+JR main_1145
+main_1140:
 MOV	A3,A6
 ADD A3,18
 MOV (A3), $3333
-main_1093:
+main_1145:
 PUSH $0000
 PUSH $0000
 PUSH $0001
@@ -1473,11 +1518,11 @@ ADD SP,18
 JRSR set_sprite_IIIIII
   MOVI  A7 ,  $0000
 MOV (i), A7
-main_1113:
+main_1165:
   MOV  A7 ,  (i)
-  MOVI  A4 ,  $0008
+  MOV  A4 ,  $0014
 CMP A7,A4
-JRGE main_1364
+JRGE main_1496
   MOV  A7 ,  (rockon)
   MOV  A4 ,  (i)
 SLL A4,1
@@ -1485,7 +1530,11 @@ ADD A7, A4
   MOV  A7 ,  (A7)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_1325
+JRNZ main_1417
+  MOV  A7 ,  (i)
+  MOVI  A4 ,  $000a
+CMP A7,A4
+JRGE main_1223
   MOVI  A4 ,  $0002
   MOV  A7 ,  (i)
 ADD A4, A7
@@ -1528,6 +1577,50 @@ SUBI A7,2
 JRX -10
 ADD SP,18
 JRSR set_sprite_IIIIII
+JR main_1252
+main_1223:
+  MOV  A5 ,  (i)
+SUBI A5,10
+PUSH A5
+PUSH $0000
+PUSH $0001
+  MOV  A7 ,  (rockx)
+  MOV  A4 ,  (i)
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+  MOV  A7 ,  (rocky)
+  MOV  A4 ,  (i)
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+PUSH $0006
+ADD SP,12
+MOV A7,SP
+SUB SP,18
+SETX 5
+PUSH (A7)
+SUBI A7,2
+JRX -8
+ADD A7, 8
+SETX 5
+POP A5
+MOV (A7),A5
+SUBI A7,2
+JRX -10
+ADD SP,18
+JRSR set_sprite2_IIIIII
+main_1252:
   MOV  A7 ,  (rockx)
   MOV  A4 ,  (i)
 SLL A4,2
@@ -1555,7 +1648,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRG main_1192
+JRG main_1284
   MOV  A7 ,  (rockx)
   MOV  A4 ,  (i)
   MOV  A5 ,  $439e
@@ -1565,8 +1658,8 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR main_1241
-main_1192:
+JR main_1333
+main_1284:
   MOV  A7 ,  (rockx)
   MOV  A4 ,  (i)
 SLL A4,2
@@ -1594,7 +1687,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRL main_1224
+JRL main_1316
   MOV  A7 ,  (rockx)
   MOV  A4 ,  (i)
   MOV  A5 ,  $4000
@@ -1604,8 +1697,8 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR main_1241
-main_1224:
+JR main_1333
+main_1316:
   MOV   A5 ,  (rockx)
   MOV 	A4 ,  (i)
 PUSH A5
@@ -1638,7 +1731,7 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-main_1241:
+main_1333:
   MOV  A7 ,  (rocky)
   MOV  A4 ,  (i)
 SLL A4,2
@@ -1666,18 +1759,18 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRG main_1273
+JRG main_1365
   MOV  A7 ,  (rocky)
   MOV  A4 ,  (i)
-  MOV  A5 ,  $4346
+  MOV  A5 ,  $4344
   MOVI  A3 ,  $0000
 SLL A4,2
 ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR main_1353
-main_1273:
+JR main_1485
+main_1365:
   MOV  A7 ,  (rocky)
   MOV  A4 ,  (i)
 SLL A4,2
@@ -1699,13 +1792,13 @@ MOVI A0,11
 INT 5
   MOV  A1 ,  A1
   MOV  A2 ,  A2
-  MOV  A3 ,  $4346
+  MOV  A3 ,  $4344
   MOVI  A4 ,  $0000
 MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRL main_1305
+JRL main_1397
   MOV  A7 ,  (rocky)
   MOV  A4 ,  (i)
   MOV  A5 ,  $4000
@@ -1715,8 +1808,8 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR main_1353
-main_1305:
+JR main_1485
+main_1397:
   MOV   A5 ,  (rocky)
   MOV 	A4 ,  (i)
 PUSH A5
@@ -1749,8 +1842,12 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR main_1353
-main_1325:
+JR main_1485
+main_1417:
+  MOV  A7 ,  (i)
+  MOVI  A4 ,  $000a
+CMP A7,A4
+JRGE main_1456
   MOVI  A4 ,  $0002
   MOV  A7 ,  (i)
 ADD A4, A7
@@ -1793,13 +1890,56 @@ SUBI A7,2
 JRX -10
 ADD SP,18
 JRSR set_sprite_IIIIII
-main_1353:
+JR main_1485
+main_1456:
+  MOV  A5 ,  (i)
+SUBI A5,10
+PUSH A5
+PUSH $0000
+PUSH $0000
+  MOV  A7 ,  (rockx)
+  MOV  A4 ,  (i)
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+  MOV  A7 ,  (rocky)
+  MOV  A4 ,  (i)
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+PUSH $0006
+ADD SP,12
+MOV A7,SP
+SUB SP,18
+SETX 5
+PUSH (A7)
+SUBI A7,2
+JRX -8
+ADD A7, 8
+SETX 5
+POP A5
+MOV (A7),A5
+SUBI A7,2
+JRX -10
+ADD SP,18
+JRSR set_sprite2_IIIIII
+main_1485:
   MOV  A5 ,  (i)
 ADDI A5,1
   MOV  A7 ,  A5
 MOV (i), A7
-JR main_1113
-main_1364:
+JR main_1165
+main_1496:
 MOV A7, brange
 PUSH (A7)
 ADDI A7,2
@@ -1811,7 +1951,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_1643
+JRLE main_1775
 MOV A7, brange
 PUSH (A7)
 ADDI A7,2
@@ -1923,15 +2063,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_1433
+JRGE main_1565
   MOV  A7 ,  $439e
   MOVI  A4 ,  $0000
 MOV A5, bx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1463
-main_1433:
+JR main_1595
+main_1565:
 MOV A7, bx
 PUSH (A7)
 ADDI A7,2
@@ -1953,15 +2093,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_1453
+JRLE main_1585
   MOV  A7 ,  $3f80
   MOVI  A4 ,  $0000
 MOV A5, bx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1463
-main_1453:
+JR main_1595
+main_1585:
 MOV A7, bx
 PUSH (A7)
 ADDI A7,2
@@ -1981,7 +2121,7 @@ MOV A5, bx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1463:
+main_1595:
 MOV A7, by
 PUSH (A7)
 ADDI A7,2
@@ -2003,15 +2143,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_1483
-  MOV  A7 ,  $4346
+JRGE main_1615
+  MOV  A7 ,  $4344
   MOVI  A4 ,  $0000
 MOV A5, by
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1513
-main_1483:
+JR main_1645
+main_1615:
 MOV A7, by
 PUSH (A7)
 ADDI A7,2
@@ -2027,21 +2167,21 @@ MOVI A0,11
 INT 5
   MOV  A1 ,  A1
   MOV  A2 ,  A2
-  MOV  A3 ,  $4346
+  MOV  A3 ,  $4344
   MOVI  A4 ,  $0000
 MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRLE main_1503
+JRLE main_1635
   MOV  A7 ,  $3f80
   MOVI  A4 ,  $0000
 MOV A5, by
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1513
-main_1503:
+JR main_1645
+main_1635:
 MOV A7, by
 PUSH (A7)
 ADDI A7,2
@@ -2061,14 +2201,22 @@ MOV A5, by
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1513:
+main_1645:
   MOVI  A7 ,  $0000
 MOV (i), A7
-main_1517:
+main_1649:
   MOV  A7 ,  (i)
-  MOVI  A4 ,  $0008
+  MOV  A4 ,  $0014
 CMP A7,A4
-JRGE main_1663
+JRGE main_1795
+  MOV  A7 ,  (rockon)
+  MOV  A4 ,  (i)
+SLL A4,1
+ADD A7, A4
+  MOV  A7 ,  (A7)
+  MOVI  A4 ,  $0001
+CMP A7,A4
+JRNZ main_1764
 MOV A7, bx
 PUSH (A7)
 ADDI A7,2
@@ -2133,14 +2281,6 @@ MOV A5, fdisty
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-  MOV  A7 ,  (rockon)
-  MOV  A4 ,  (i)
-SLL A4,1
-ADD A7, A4
-  MOV  A7 ,  (A7)
-  MOVI  A4 ,  $0001
-CMP A7,A4
-JRNZ main_1632
 MOV A7, fdistx
 PUSH (A7)
 ADDI A7,2
@@ -2183,7 +2323,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_1632
+JRGE main_1764
   MOVI  A0 ,  $000b
   MOVI  A1 ,  $0001
 OUT A0,A1
@@ -2228,13 +2368,13 @@ MOV (A5), A4
   MOVI  A0 ,  $0005
   MOV  A1 ,  (score)
 JRSR print_num
-main_1632:
+main_1764:
   MOV  A5 ,  (i)
 ADDI A5,1
   MOV  A7 ,  A5
 MOV (i), A7
-JR main_1517
-main_1643:
+JR main_1649
+main_1775:
 PUSH $0001
 PUSH $0000
 PUSH $0000
@@ -2274,17 +2414,17 @@ MOV A5, brange
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1663:
+main_1795:
 MOV	A3,A6
 ADD A3,28
 MOV (A3), $0001
   MOVI  A7 ,  $0000
 MOV (i), A7
-main_1670:
+main_1802:
   MOV  A7 ,  (i)
-  MOVI  A4 ,  $0008
+  MOV  A4 ,  $0014
 CMP A7,A4
-JRGE main_1703
+JRGE main_1835
   MOV  A7 ,  (rockon)
   MOV  A4 ,  (i)
 SLL A4,1
@@ -2292,23 +2432,23 @@ ADD A7, A4
   MOV  A7 ,  (A7)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_1692
+JRNZ main_1824
 MOV	A3,A6
 ADD A3,28
 MOV (A3), $0000
-main_1692:
+main_1824:
   MOV  A5 ,  (i)
 ADDI A5,1
   MOV  A7 ,  A5
 MOV (i), A7
-JR main_1670
-main_1703:
+JR main_1802
+main_1835:
 MOV	A3,A6
 ADD A3,28
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $0001
 CMP A7,A4
-JRNZ main_1728
+JRNZ main_1860
   MOV  A5 ,  (level)
 ADDI A5,1
   MOV  A7 ,  A5
@@ -2332,7 +2472,7 @@ JRSR init_I
 MOV	A3,A6
 ADD A3,16
 MOV (A3), $012c
-main_1728:
+main_1860:
 MOV A7, sx
 PUSH (A7)
 ADDI A7,2
@@ -2354,15 +2494,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRL main_1748
+JRL main_1880
   MOV  A7 ,  $4000
   MOVI  A4 ,  $0000
 MOV A5, sx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1778
-main_1748:
+JR main_1910
+main_1880:
 MOV A7, sx
 PUSH (A7)
 ADDI A7,2
@@ -2384,15 +2524,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRG main_1768
+JRG main_1900
   MOV  A7 ,  $439e
   MOVI  A4 ,  $0000
 MOV A5, sx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1778
-main_1768:
+JR main_1910
+main_1900:
 MOV A7, sx
 PUSH (A7)
 ADDI A7,2
@@ -2412,7 +2552,7 @@ MOV A5, sx
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1778:
+main_1910:
 MOV A7, sy
 PUSH (A7)
 ADDI A7,2
@@ -2428,21 +2568,21 @@ MOVI A0,11
 INT 5
   MOV  A1 ,  A1
   MOV  A2 ,  A2
-  MOV  A3 ,  $4346
+  MOV  A3 ,  $4344
   MOVI  A4 ,  $0000
 MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRL main_1798
+JRL main_1930
   MOV  A7 ,  $4000
   MOVI  A4 ,  $0000
 MOV A5, sy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1828
-main_1798:
+JR main_1960
+main_1930:
 MOV A7, sy
 PUSH (A7)
 ADDI A7,2
@@ -2464,15 +2604,15 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRG main_1818
-  MOV  A7 ,  $4346
+JRG main_1950
+  MOV  A7 ,  $4344
   MOVI  A4 ,  $0000
 MOV A5, sy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-JR main_1828
-main_1818:
+JR main_1960
+main_1950:
 MOV A7, sy
 PUSH (A7)
 ADDI A7,2
@@ -2492,19 +2632,27 @@ MOV A5, sy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1828:
+main_1960:
 MOV	A3,A6
 ADD A3,16
   MOV  A7 ,  (A3)
 CMPI A7,0
-JRNZ  main_1980
+JRNZ  main_2112
   MOVI  A7 ,  $0000
 MOV (i), A7
-main_1837:
+main_1969:
   MOV  A7 ,  (i)
-  MOVI  A4 ,  $0008
+  MOV  A4 ,  $0014
 CMP A7,A4
-JRGE main_1983
+JRGE main_2115
+  MOV  A7 ,  (rockon)
+  MOV  A4 ,  (i)
+SLL A4,1
+ADD A7, A4
+  MOV  A7 ,  (A7)
+  MOVI  A4 ,  $0001
+CMP A7,A4
+JRNZ main_2101
 MOV A7, sx
 PUSH (A7)
 ADDI A7,2
@@ -2569,14 +2717,6 @@ MOV A5, fdisty
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-  MOV  A7 ,  (rockon)
-  MOV  A4 ,  (i)
-SLL A4,1
-ADD A7, A4
-  MOV  A7 ,  (A7)
-  MOVI  A4 ,  $0001
-CMP A7,A4
-JRNZ main_1969
 MOV A7, fdistx
 PUSH (A7)
 ADDI A7,2
@@ -2619,7 +2759,7 @@ MOVI A0,12
 INT 5
   MOV  A7 ,  A0
 CMPI A7,0
-JRGE main_1969
+JRGE main_2101
   MOVI  A0 ,  $000b
   MOVI  A1 ,  $0000
 OUT A0,A1
@@ -2686,17 +2826,17 @@ MOV A5, sdy
 MOV (A5),A7
 ADDI A5,2
 MOV (A5), A4
-main_1969:
+main_2101:
   MOV  A5 ,  (i)
 ADDI A5,1
   MOV  A7 ,  A5
 MOV (i), A7
-JR main_1837
-main_1980:
+JR main_1969
+main_2112:
 MOV	A3,A6
 ADD A3,16
 ADD (A3),-1
-main_1983:
+main_2115:
 MOVI A1,0
 MOVI A0,0
 INT 4
@@ -2713,14 +2853,14 @@ Label_7:
 MOV A3,A6
 ADDI A3,12
 MOV (A3),A7
-JR main_319
-main_1991:
+JR main_364
+main_2123:
 MOV	A3,A6
 ADDI A3,12
 MOV (A3), $0000
 PUSH $000a
 PUSH $0012
-GADR A7, _string_163
+GADR A7, _string_166
   MOV  A1 ,  A7
 POP A0
 POP A2
@@ -2729,7 +2869,7 @@ MOVI A0,5
 INT 4
 PUSH $000c
 PUSH $000c
-GADR A7, _string_164
+GADR A7, _string_167
   MOV  A1 ,  A7
 POP A0
 POP A2
@@ -2739,10 +2879,10 @@ INT 4
   MOV  A7 ,  (score)
   MOV  A4 ,  (hiscore)
 CMP A7,A4
-JRLE main_2036
+JRLE main_2168
 PUSH $000e
 PUSH $0012
-GADR A7, _string_165
+GADR A7, _string_168
   MOV  A1 ,  A7
 POP A0
 POP A2
@@ -2751,25 +2891,25 @@ MOVI A0,5
 INT 4
   MOV  A7 ,  (score)
 MOV (hiscore), A7
-main_2036:
+main_2168:
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0051
 CMP A7,A4
-JRZ, main_2065
+JRZ, main_2197
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
   MOV  A4 ,  $0071
 CMP A7,A4
-JRZ, main_2065
+JRZ, main_2197
 MOV	A3,A6
 ADDI A3,12
   MOV  A7 ,  (A3)
   MOVI  A4 ,  $000d
 CMP A7,A4
-JRZ, main_2065
+JRZ, main_2197
 MOVI A1,0
 MOVI A0,0
 INT 4
@@ -2786,10 +2926,10 @@ Label_8:
 MOV A3,A6
 ADDI A3,12
 MOV (A3),A7
-JR main_2036
-main_2065:
+JR main_2168
+main_2197:
 JR main_20
-main_2068:
+main_2200:
   MOVI  A0 ,  $000b
   MOVI  A1 ,  $0000
 OUT A0,A1
@@ -3352,6 +3492,182 @@ OUT.B A0,A1
 ADD SP,12
 POP A6
 RET
+set_sprite2_IIIIII:
+PUSH A6
+MOV A3,SP
+SUB SP, 12
+MOV A6,SP
+ADDI A6,2
+PUSH $5000
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,6
+  MOV  A2 ,  (A3)
+  MOV  A1 ,  $0100
+MOVI A0,9
+INT 4
+  MOV  A1 ,  A1
+POP A0
+OUT.B A0,A1
+PUSH $5001
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,6
+  MOV  A2 ,  (A3)
+  MOV  A1 ,  $0100
+MOVI A0,9
+INT 4
+  MOV  A1 ,  A0
+POP A0
+OUT.B A0,A1
+PUSH $5002
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+  MOV  A0 ,  A4
+  MOVI  A1 ,  $0000
+OUT.B A0,A1
+PUSH $5003
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,8
+  MOV  A1 ,  (A3)
+POP A0
+OUT.B A0,A1
+PUSH $5006
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,10
+  MOV  A1 ,  (A3)
+POP A0
+OUT.B A0,A1
+PUSH $5007
+PUSH $0100
+MOV	A3,A6
+ADDI A3,2
+  MOV  A1 ,  (A3)
+POP A2
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,0
+  MOV  A2 ,  (A3)
+  MOVI  A1 ,  $0008
+MOVI A0,8
+INT 4
+  MOV  A7 ,  A1
+POP A4
+ADD A4, A7
+PUSH A4
+MOV	A3,A6
+ADDI A3,4
+  MOV  A1 ,  (A3)
+POP A0
+OUT.B A0,A1
+ADD SP,12
+POP A6
+RET
 init_I:
 PUSH A6
 MOV A3,SP
@@ -3377,9 +3693,9 @@ init_I_2:
 MOV	A3,A6
 ADDI A3,2
   MOV  A7 ,  (A3)
-  MOVI  A4 ,  $0008
+  MOV  A4 ,  $0014
 CMP A7,A4
-JRGE init_I_150
+JRGE init_I_182
 PUSH (rockon)
 MOV	A3,A6
 ADDI A3,2
@@ -3394,7 +3710,7 @@ MOV	A3,A6
 ADDI A3,2
 PUSH (A3)
 PUSH $0014
-  MOV  A1 ,  $0122
+  MOV  A1 ,  $0104
 MOV A0,(RAND)
 MOV A2,997
 MULU A2,A0
@@ -3423,7 +3739,7 @@ MOV	A3,A6
 ADDI A3,2
 PUSH (A3)
 PUSH $000a
-  MOV  A1 ,  $00be
+  MOV  A1 ,  $00aa
 MOV A0,(RAND)
 MOV A2,997
 MULU A2,A0
@@ -3450,9 +3766,9 @@ MOV (A7),A3
 MOV	A3,A6
 ADDI A3,2
   MOV  A7 ,  (A3)
-  MOVI  A4 ,  $0004
+  MOVI  A4 ,  $0008
 CMP A7,A4
-JRGE init_I_67
+JRGE init_I_68
 PUSH (rockdx)
 MOV	A3,A6
 ADDI A3,2
@@ -3490,8 +3806,8 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR init_I_83
-init_I_67:
+JR init_I_84
+init_I_68:
 PUSH (rockdx)
 MOV	A3,A6
 ADDI A3,2
@@ -3532,13 +3848,13 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-init_I_83:
+init_I_84:
 MOV	A3,A6
 ADDI A3,2
   MOV  A7 ,  (A3)
-  MOVI  A4 ,  $0006
+  MOVI  A4 ,  $000f
 CMP A7,A4
-JRGE init_I_107
+JRGE init_I_108
 PUSH (rockdy)
 MOV	A3,A6
 ADDI A3,2
@@ -3576,8 +3892,8 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-JR init_I_123
-init_I_107:
+JR init_I_124
+init_I_108:
 PUSH (rockdy)
 MOV	A3,A6
 ADDI A3,2
@@ -3618,7 +3934,13 @@ ADD A7,A4
 MOV (A7),A5
 ADD A7,2
 MOV (A7),A3
-init_I_123:
+init_I_124:
+MOV	A3,A6
+ADDI A3,2
+  MOV  A7 ,  (A3)
+  MOVI  A4 ,  $000a
+CMP A7,A4
+JRGE init_I_154
 PUSH $0002
 MOV	A3,A6
 ADDI A3,2
@@ -3670,11 +3992,63 @@ SUBI A7,2
 JRX -10
 ADD SP,18
 JRSR set_sprite_IIIIII
+JR init_I_176
+init_I_154:
+MOV	A3,A6
+ADDI A3,2
+  MOV  A5 ,  (A3)
+SUBI A5,10
+PUSH A5
+PUSH $0000
+PUSH $0001
+PUSH (rockx)
+MOV	A3,A6
+ADDI A3,2
+  MOV  A4 ,  (A3)
+POP A7
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+PUSH (rocky)
+MOV	A3,A6
+ADDI A3,2
+  MOV  A4 ,  (A3)
+POP A7
+SLL A4,2
+ADD A7, A4
+PUSH (A7)
+ADDI A7,2
+  MOV  A4 ,  (A7)
+POP A3
+JRSR float_to_int
+PUSH A1
+PUSH $0002
+ADD SP,12
+MOV A7,SP
+SUB SP,18
+SETX 5
+PUSH (A7)
+SUBI A7,2
+JRX -8
+ADD A7, 8
+SETX 5
+POP A5
+MOV (A7),A5
+SUBI A7,2
+JRX -10
+ADD SP,18
+JRSR set_sprite2_IIIIII
+init_I_176:
 MOV	A3,A6
 ADDI A3,2
 ADD (A3),1
 JR init_I_2
-init_I_150:
+init_I_182:
 ADD SP,4
 POP A6
 RET
@@ -3832,58 +4206,72 @@ dw $0088, $0088, $0088, $0088, $0088, $0088, $0088, $0088
 dw $0088, $0088, $0088, $0088, $0088, $0088, $0088, $0088
 DW 128   ; rock_data.length
 _rock_data:
-dw $0088, $0088, $0077, $0088, $0088, $0088, $0088, $0088
-dw $0088, $0087, $0073, $0077, $0088, $0088, $0088, $0088
-dw $0087, $0073, $0023, $0023, $0077, $0078, $0088, $0088
-dw $0073, $0023, $0033, $0026, $0033, $0037, $0077, $0088
-dw $0087, $0032, $0063, $0033, $0033, $0033, $0037, $0088
-dw $0088, $0077, $0033, $0033, $0033, $0063, $0033, $0078
-dw $0088, $0088, $0073, $0033, $0063, $0026, $0033, $0078
-dw $0088, $0087, $0036, $0036, $0023, $0062, $0063, $0037
-dw $0087, $0073, $0033, $0033, $0063, $0036, $0063, $0037
-dw $0073, $0036, $0033, $0033, $0033, $0063, $0033, $0037
-dw $0073, $0033, $0033, $0033, $0033, $0033, $0033, $0078
-dw $0073, $0057, $0033, $0063, $0063, $0035, $0057, $0088
-dw $0087, $0078, $0077, $0033, $0033, $0037, $0078, $0088
-dw $0087, $0088, $0088, $0075, $0035, $0078, $0088, $0088
-dw $0088, $0088, $0088, $0087, $0057, $0088, $0088, $0088
-dw $0088, $0088, $0088, $0088, $0078, $0088, $0088, $0088
-DW 8   ; rockx.length
+dw $00ff, $00ff, $00ff, $00ff, $006f, $00ff, $00ff, $00ff
+dw $00ff, $00f6, $00ff, $00f6, $0046, $00ff, $006f, $00ff
+dw $00ff, $0064, $0066, $0064, $0046, $0066, $0046, $00ff
+dw $00f6, $0044, $0044, $0044, $0044, $0044, $0046, $00ff
+dw $00ff, $0064, $0044, $0044, $0044, $0044, $0044, $006f
+dw $00f6, $0044, $0044, $0044, $0044, $0044, $0044, $0046
+dw $00f6, $0044, $0044, $0044, $0044, $0044, $0044, $006f
+dw $00ff, $0064, $0044, $0044, $0044, $0044, $0044, $006f
+dw $00f6, $0044, $0044, $0044, $0044, $0044, $0046, $00ff
+dw $0064, $0044, $0044, $0044, $0044, $0044, $0046, $00ff
+dw $0064, $0044, $0044, $0044, $0044, $0044, $0066, $00ff
+dw $00f6, $0064, $0044, $0044, $0044, $0044, $006f, $00ff
+dw $00ff, $00f6, $0044, $0044, $0066, $0044, $006f, $00ff
+dw $00ff, $00ff, $0064, $0064, $006f, $0064, $0046, $00ff
+dw $00ff, $00ff, $00f6, $00f6, $00ff, $00f6, $006f, $00ff
+dw $00ff, $00ff, $00ff, $00ff, $00ff, $00ff, $00ff, $00ff
+DW 20   ; rockx.length
 _rockx:
-DW  $0000, $0088, $0000, $0088, $0000, $0077, $0000, $0088
-DW  $0000, $0088, $0000, $0088, $0000, $0088, $0000, $0088
-DW 8   ; rocky.length
+DW  $0000, $00ff, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $006f, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $00ff, $0000, $00f6, $0000, $00ff, $0000, $00f6
+DW  $0000, $0046, $0000, $00ff, $0000, $006f, $0000, $00ff
+DW  $0000, $00ff, $0000, $0064, $0000, $0066, $0000, $0064
+DW 20   ; rocky.length
 _rocky:
-DW  $0000, $0088, $0000, $0088, $0000, $0077, $0000, $0088
-DW  $0000, $0088, $0000, $0088, $0000, $0088, $0000, $0088
-DW 8   ; rockdx.length
+DW  $0000, $00ff, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $006f, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $00ff, $0000, $00f6, $0000, $00ff, $0000, $00f6
+DW  $0000, $0046, $0000, $00ff, $0000, $006f, $0000, $00ff
+DW  $0000, $00ff, $0000, $0064, $0000, $0066, $0000, $0064
+DW 20   ; rockdx.length
 _rockdx:
-DW  $0000, $0088, $0000, $0088, $0000, $0077, $0000, $0088
-DW  $0000, $0088, $0000, $0088, $0000, $0088, $0000, $0088
-DW 8   ; rockdy.length
+DW  $0000, $00ff, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $006f, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $00ff, $0000, $00f6, $0000, $00ff, $0000, $00f6
+DW  $0000, $0046, $0000, $00ff, $0000, $006f, $0000, $00ff
+DW  $0000, $00ff, $0000, $0064, $0000, $0066, $0000, $0064
+DW 20   ; rockdy.length
 _rockdy:
-DW  $0000, $0088, $0000, $0088, $0000, $0077, $0000, $0088
-DW  $0000, $0088, $0000, $0088, $0000, $0088, $0000, $0088
-DW 8   ; rockon.length
+DW  $0000, $00ff, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $006f, $0000, $00ff, $0000, $00ff, $0000, $00ff
+DW  $0000, $00ff, $0000, $00f6, $0000, $00ff, $0000, $00f6
+DW  $0000, $0046, $0000, $00ff, $0000, $006f, $0000, $00ff
+DW  $0000, $00ff, $0000, $0064, $0000, $0066, $0000, $0064
+DW 20   ; rockon.length
 _rockon:
-dw $0088, $0088, $0077, $0088, $0088, $0088, $0088, $0088
+dw $00ff, $00ff, $00ff, $00ff, $006f, $00ff, $00ff, $00ff
+dw $00ff, $00f6, $00ff, $00f6, $0046, $00ff, $006f, $00ff
+dw $00ff, $0064, $0066, $0064
 DW 5
-_string_137:
+_string_140:
 TEXT "L:  6"
 DB 0
 DW 4
-_string_138:
+_string_141:
 TEXT "S: 0"
 DW 0
 DW 17
-_string_163:
+_string_166:
 TEXT "*** GAME OVER ***"
 DB 0
 DW 25
-_string_164:
+_string_167:
 TEXT "PRESS ENTER TO PLAY AGAIN"
 DB 0
 DW 18
-_string_165:
+_string_168:
 TEXT "!!! HIGH SCORE !!!"
 DW 0
