@@ -40,7 +40,7 @@ To normally run the LionComputer:
 
 - First you should **File->Load BIN** the **lionrom.asm.bin**.
 
-- Then you should **File->Load BIN at Address** the **lionbasic.asm.bin.** Load it at the hex address **$2434**.
+- Then you should **File->Load BIN at Address** the **lionbasic.asm.bin.** Load it at the hex address **$2436**.
 
 - Press **[RUN]**. The system will run the Lion Basic and wait for commands.
 
