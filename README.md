@@ -22,6 +22,7 @@ LionWin uses the NAudio library:
 
 https://github.com/naudio/NAudio
 
+
 Before the first solution run, make sure to 
 
 - Uncheck, if not unchecked already, the DEBUG compiler constant for the two projects (the LionComputerEmulator class library and the LionWin frontend).
@@ -29,27 +30,11 @@ Before the first solution run, make sure to
 - Set the LionWin frontend project, as StartUp Project.
 
 
-To run the LionComputer in one click:
-
-- Choose **File->Open BIN** and select the **system.bin**. This will load a snapshot of the latest system of the computer. 
-
-- Press the **[RUN]** button. The system will run the Lion Basic and wait for commands.
-
-
-To normally run the LionComputer:
-
-- First you should **File->Load BIN** the **lionrom.asm.bin**.
-
-- Then you should **File->Load BIN at Address** the **lionbasic.asm.bin.** Load it at the hex address **$2436**.
-
-- Press **[RUN]**. The system will run the Lion Basic and wait for commands.
-
-
-Then you could load the demo game [**'Astro'**](https://www.youtube.com/watch?v=rEBGKEbPayw):
+To run the demo game [**'Astro'**](https://www.youtube.com/watch?v=rEBGKEbPayw):
 
 - **File->Load BIN at Address** and choose the file type **'RBN'** (relative BIN). Load the **astro.asm.rbn** at the decimal address **20000**.
 
-- After the load to memory and in the Lion Basic, type **RCODE20000** to run the **Astro** game code.
+- At the Lion Basic type **RCODE20000** to run the **Astro** game code.
 
 - Use the Windows Keyboard Arrows as a joystick, the Control key as a fire button and enjoy the game!
 
