@@ -240,7 +240,7 @@ namespace LionComputerEmulator
             screenPalette.Entries[7] = Color.FromArgb(255, 255, 255);
 
             // poke the high palette for mode1
-            screenPalette.Entries[8] = Color.FromArgb(0, 0, 0);
+            screenPalette.Entries[8] = Color.FromArgb(56, 56, 56);
             screenPalette.Entries[9] = Color.FromArgb(0, 0, 255);
             screenPalette.Entries[10] = Color.FromArgb(0, 255, 0);
             screenPalette.Entries[11] = Color.FromArgb(0, 255, 255);
