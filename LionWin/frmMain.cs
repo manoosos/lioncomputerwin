@@ -91,9 +91,7 @@ namespace LionWin
             {
                 MessageBox.Show(string.Format(@"CRASHED! Program Counter: {0} (0x0{1})
 
-Exception: {2}
-
-Stacktrace: {3}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.Message, ex.StackTrace), "Undefined Instruction", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+Exception: {2}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.Message), "Undefined Instruction", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
             finally
             {
