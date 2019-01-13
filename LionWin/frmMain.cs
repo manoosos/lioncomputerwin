@@ -802,8 +802,7 @@ PC: {2}";
             Display.InitScreen();
             Sound.Init();
             Clipboard.Clear();
-            bool _res = OpenBin("system.bin");
-            if (_res == true)
+            if (OpenBin("system.bin"))
                 btnRun_Click(null, null);
         }
     }

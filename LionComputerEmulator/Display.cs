@@ -191,6 +191,7 @@ namespace LionComputerEmulator
             screenPalette.Entries[13] = Color.FromArgb(255, 0, 255);
             screenPalette.Entries[14] = Color.FromArgb(255, 255, 0);
             screenPalette.Entries[15] = Color.FromArgb(255, 255, 255);
+            screenBitMap.Palette = screenPalette;
 
             SpritePortWorker.DoWork += SpritePortWork;
             VideoModePortWorker.DoWork += VideoModePortWork;
@@ -199,7 +200,6 @@ namespace LionComputerEmulator
 
         public static Bitmap Screen()
         {
-            screenBitMap.Palette = screenPalette;
             switch (videoMode)
             {
                 case 1:
@@ -490,7 +490,7 @@ namespace LionComputerEmulator
 
         private static void BlitSprite(ref int spriteParams, ref int spriteData, int modeOffsetBytes = 0)
         {
-            int __maxclip = screenBytes.Length - 64 - modeOffsetBytes;
+            int __maxclip = screenBytes.Length - modeOffsetBytes;
             int x = (Ram[spriteParams++] << 8 | Ram[spriteParams++]) << 1;
             int y = (Ram[spriteParams++] << 8 | Ram[spriteParams]) << 1;
             int srcScreenIndex = modeOffsetBytes + y * 640 + x;
