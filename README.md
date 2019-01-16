@@ -12,7 +12,7 @@ The **LionComputer** is an FPGA based CPU-Computer, designed By Theodoulos Liont
 
 LionComputer Project Page:
 
-http://users.sch.gr/tliontakis/index.php/my-projects/13-vhdl-cpu
+https://hackaday.io/project/162876-lion-fpga-cpucomputer
 
 LionComputer Assembler:
 
