@@ -36,8 +36,11 @@ XCN         EQU   79
 YCN         EQU   29
 VMODE		EQU   $2434
 SCOL		EQU   $2435
+SHIFT       DS    1
+CAPSL       DS    1
+RESRVB      DS    16
 
-ORG     	$2436  ;Ram
+ORG     	$2448  ;Ram
 
 ; RAM program ENTRY POINT
 ; A7 Reserved for decimal (was num2), in A6 fraction result of TSTNUM
@@ -176,8 +179,7 @@ ST4:
 TSTV:		
 		MOVHL	A0,'@'
 		JSR	IGNBLNK
-		JC	RET01
-TSTV1:	
+		JC	RET2
 		JNZ	TV1
 		JSR	PARN
 		SLL	A1,2
@@ -189,15 +191,17 @@ TSTV1:
 		MOV 	A1,TXTEND
 		SUB	A1,A3
 		POP	A3
-RET01:	
 		RET
 
-TV1:		CMP.B	A0,'Z'  ; TEST VARIABLE
+TV1:		CMP.B	A0,122 ;'z'  ; TEST VARIABLE
 		JA	RET22
-		CMP.B	A0,'A'
+		CMP.B	A0,97
+            JAE   TV2
+		CMP.B A0,'Z'
+		JA    RET22
+		CMP.B A0,'A'
 		JC	RET2
-		INC	A3
-TV1A:	
+TV2:		INC	A3
 		MOV	A1,VARBGN
 		SUB.B	A0,65
 		AND	A0,$00FF
@@ -551,7 +555,12 @@ EXEC:
 	PUSH	A3
 EX1:
 	MOV.B	A0,(A3)
-	INC	A3
+      CMP.B A0,97
+      JB	SKIPUP
+      CMP.B A0,128
+	JAE   SKIPUP
+      AND.B	A0,$DF        ; UPPER CASE 
+SKIPUP: INC	A3
 	CMP.B	A0,'.'   
 	JZ	EX4
 	INC	A1
@@ -1473,6 +1482,7 @@ LD1:  MOV.B	A0,(A3)
 	MOV.B	(A4),A0
 LD2:	;INC	A4
 	JXAB	A4,LD1
+	INC	A4
 	MOVHL	A0,34   
 	JSR	IGNBLNK
 	JNZ	QWHAT
@@ -1490,11 +1500,11 @@ LD2:	;INC	A4
 LD4:	MOV	A4,FNAME
 	MOV	A1,TXTBGN
 LD6:	PUSH	A3
-	PUSH	A5
+	PUSH	A4
 	MOV	A3,A1          ; load address
 	MOVI	A0,2
 	INT	5              ; LOAD FILE
-	POP	A5
+	POP	A4
 	POP	A3
 	CMPI	A0,0
 	JZ	QHOW
@@ -1514,7 +1524,7 @@ LD3:	POP	A1
 ;--------------------------
 
 DELAY:	PUSHX
-		SETX	62000
+		SETX	65000
 LDDL: 	JMPX	LDDL    ;delay
 		POPX
 		RET
@@ -1723,7 +1733,7 @@ GCODE:
 	SETX  A1
 GCWAIT:
 	MOVI	A0,0
-	INT	4           ; Get keyboard code
+	INT	4           ; Get byte
 	BTST	A0,1        ; if availiable
 	JNZ	GC1
 	MOVI	A0,7
@@ -2261,7 +2271,7 @@ KEYIN:
 		JC	SKP2
 		CMP.B	A0,122
 		JA	SKP2
-		AND.B	A0,$DF        ; UPPER CASE 
+		;AND.B	A0,$DF        ; UPPER CASE 
 SKP2:	      CMPI.B A0,8       ; BS
 		JNZ   GL2
 		CMP	A4,BUFFER
@@ -2773,9 +2783,9 @@ OK		TEXT	"OK"
 what		TEXT    "What?"
 		DB	$0d
 sorry		TEXT    "Sorry"
-		DB    $0d,0
+		DB    $0d
 
-SER		DB	0
+SER		DB	0,0
 RAND		DW	983
 CURRNT	DW	0
 STKGOS	DW	0
@@ -2788,13 +2798,13 @@ LOPLN		DW	0
 LOPPT		DW	0
 
 TXTUNF	DA    TXTBGN
-TXTBGN	DS	38000   ; program space
+TXTBGN	DS	44000   ; program space
 TXTEND	DS	4
 
 BUFFER	DS	120
 BUFEND:
 
-VARBGN	DS	240
+VARBGN	DS	256
 
 STKLMT	DS	2048
 STACK:	

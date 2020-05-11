@@ -9,7 +9,6 @@ using System.Xml.Serialization;
 using LionComputerEmulator;
 using LionWin.Properties;
 using System.Globalization;
-//using System.Threading.Tasks;
 using System.Drawing;
 using System.Threading;
 
@@ -125,7 +124,7 @@ Exception: {2}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.Me
                     SetImage(Display.Screen());
                     lastRefresh = DateTime.Now;
                 }
-                Thread.Sleep(1);
+                Thread.Sleep(0);
             }
         }
 
