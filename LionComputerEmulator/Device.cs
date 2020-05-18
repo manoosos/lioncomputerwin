@@ -9,9 +9,9 @@ namespace LionComputerEmulator
         /// </summary>
         private static PortNumber _port = new PortNumber();
         private static DateTime timerTime = DateTime.Now;
+        private static ushort _retvalue;
 
         #region public members
-
         public const int MAX_DEVICE_PORTS = 0x0100;
 
         // serial send-receive on dte side namings
@@ -60,10 +60,18 @@ namespace LionComputerEmulator
                     if (number < 0 || number >= MAX_DEVICE_PORTS)
                         return 0x0ffff;
 
-                    if (number == TIMER_SPRITES)
-                        return (ushort)(DateTime.Now - timerTime).TotalMilliseconds;
+                    switch (number)
+                    {
+                        case TIMER_SPRITES:
+                            _retvalue = (ushort)(DateTime.Now - timerTime).TotalMilliseconds;
+                            break;
 
-                    return port[number];
+                        default:
+                            _retvalue = port[number];
+                            break;
+                    }
+
+                    return _retvalue;
                 }
 
                 set
@@ -83,13 +91,15 @@ namespace LionComputerEmulator
                                 break;
 
                             case SOUND_CONTROL:
-                                Device.Port[Device.SOUND_STATUS] |= 1; // channel start
+                                // channel 1 start
+                                Device.Port[Device.SOUND_STATUS] |= 1;
                                 while (Sound.WorkerChannel1.IsBusy) ;
                                 Sound.WorkerChannel1.RunWorkerAsync();
                                 break;
 
                             case SOUND_CONTROL_2:
-                                Device.Port[Device.SOUND_STATUS] |= 2; // channel start
+                                // channel 2 start
+                                Device.Port[Device.SOUND_STATUS] |= 2;
                                 while (Sound.WorkerChannel2.IsBusy) ;
                                 Sound.WorkerChannel2.RunWorkerAsync();
                                 break;

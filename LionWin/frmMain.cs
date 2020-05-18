@@ -52,7 +52,7 @@ namespace LionWin
             while (Cpu.isRunning)
             {
                 Application.DoEvents();
-                System.Threading.Thread.Sleep(10);
+                Thread.Sleep(0);
             }
             RunThread.Join();
 
@@ -76,7 +76,7 @@ namespace LionWin
                 {
                     if (pauseEmulation)
                     {
-                        Thread.Sleep(100);
+                        Thread.Sleep(0);
                         continue;
                     }
                     Cpu.Execute();
@@ -148,6 +148,7 @@ Exception: {2}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.Me
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Cpu.isRunning = false;
+            Thread.Sleep(0);
             if (RunThread != null)
                 RunThread.Join();
         }
@@ -155,6 +156,7 @@ Exception: {2}", State.PC, Convert.ToString(State.PC, 16).PadLeft(4, '0'), ex.Me
         private void btnStop_Click(object sender, EventArgs e)
         {
             Cpu.isRunning = false;
+            Thread.Sleep(0);
             if (RunThread != null)
                 RunThread.Join();
         }
@@ -427,7 +429,6 @@ PC: {2}";
             {
                 pauseEmulation = false;
             }
-
         }
 
         private void UpdateDasmSymbols(string binfilename, int offset = 0)
@@ -510,6 +511,8 @@ PC: {2}";
             // clear vram
             byte[] zeroVram = new byte[Display.Ram.Length];
             Buffer.BlockCopy(zeroVram, 0, Display.Ram, 0, Display.Ram.Length);
+            // check if disk writable
+            CheckDiskImageWritable();
         }
 
         private string OpenFile(string filter, bool isBasic = false)
@@ -526,7 +529,6 @@ PC: {2}";
                     MessageBox.Show("Δέν ξέρω που είναι το TXTUNF !!!\r\nΚάνε compile και φόρτωσε ένα σύστημα\r\nγια να φτιαχτούν τα Symbols!", "Λάθος", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return null;
                 }
-
             }
 
             using (OpenFileDialog ofd = new OpenFileDialog())
@@ -797,12 +799,50 @@ PC: {2}";
                 Application.Exit();
                 return;
             }
+            DiskOperations.VHDPath = settings.VHDImagePath;
+            CheckDiskImageWritable();
             Disassembler.GenerateInstructionsText();
             Display.InitScreen();
             Sound.Init();
             Clipboard.Clear();
             if (OpenBin("system.bin"))
                 btnRun_Click(null, null);
+        }
+
+        private void mnuOpenVHD_Click(object sender, EventArgs e)
+        {
+            pauseEmulation = true;
+            try
+            {
+                string fname;
+                DiskOperations.VHDPath = string.Empty;
+                if (string.IsNullOrEmpty(fname = OpenFile("VHD files|*.vhd|All files|*.*")))
+                    return;
+                DiskOperations.VHDPath = fname;
+                settings.VHDImagePath = fname;
+                settings.Save();
+                CheckDiskImageWritable();
+            }
+            finally
+            {
+                pauseEmulation = false;
+            }
+        }
+
+        private void CheckDiskImageWritable()
+        {
+            try
+            {
+                DiskOperations.isDiskReadWrite = false;
+                if (!string.IsNullOrEmpty(DiskOperations.VHDPath))
+                {
+                    using (FileStream fs = File.Open(DiskOperations.VHDPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        DiskOperations.isDiskReadWrite = true;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }

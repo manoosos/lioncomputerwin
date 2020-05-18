@@ -100,7 +100,7 @@ SDNOT:
 		MOV		A1,SDNOTOK
 		MOVI		A2,5
 		INT		4
-		JMP		START
+		JMP		MEMNOK
 
 
 ;   End of boot code

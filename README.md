@@ -18,6 +18,10 @@ LionComputer Assembler:
 
 https://github.com/lliont/Lionasm
 
+LionWin Project Page:
+
+https://hackaday.io/project/162901-lionwin
+
 LionWin uses the NAudio library:
 
 https://github.com/naudio/NAudio
@@ -37,9 +41,3 @@ To run the demo game [**'Astro'**](https://www.youtube.com/watch?v=rEBGKEbPayw):
 - At the Lion Basic type **RCODE20000** to run the **Astro** game code.
 
 - Use the Windows Keyboard Arrows as a joystick, the Control key as a fire button and enjoy the game!
-
-
-The LionWin emulator does not emulate the hardware SPI and the FAT file system at the moment, so the Lion Basic commands LOAD, SAVE, DIR, DELETE, LCODE, SCODE do nothing. The file i/o is done at the frontend though, at the 'File' menu.
-
-
-This is not a complete manual and more updates should be done!

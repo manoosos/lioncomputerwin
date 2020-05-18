@@ -33,6 +33,8 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenVHD = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuOpenBIN = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuLoadBIN = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,6 +110,8 @@
             // mnuFile
             // 
             this.mnuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuOpenVHD,
+            this.toolStripSeparator5,
             this.mnuOpenBIN,
             this.toolStripSeparator1,
             this.mnuLoadBIN,
@@ -124,6 +128,18 @@
             this.mnuFile.Name = "mnuFile";
             this.mnuFile.Size = new System.Drawing.Size(37, 20);
             this.mnuFile.Text = "File";
+            // 
+            // mnuOpenVHD
+            // 
+            this.mnuOpenVHD.Name = "mnuOpenVHD";
+            this.mnuOpenVHD.Size = new System.Drawing.Size(180, 22);
+            this.mnuOpenVHD.Text = "Open VHD Image";
+            this.mnuOpenVHD.Click += new System.EventHandler(this.mnuOpenVHD_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
             // 
             // mnuOpenBIN
             // 
@@ -403,6 +419,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lblPC;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenVHD;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
     }
 }
 
