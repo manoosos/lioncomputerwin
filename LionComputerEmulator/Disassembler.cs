@@ -451,6 +451,10 @@ namespace LionComputerEmulator
                         case 0x04c00:
                             instruction.Mnemonic = "SRSET";
                             break;
+
+                        case 0x08600:
+                            instruction.Mnemonic = "CLI";
+                            break;
                     }
                 }
 

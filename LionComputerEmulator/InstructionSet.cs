@@ -2988,15 +2988,7 @@ namespace LionComputerEmulator
             {
                 OpCode = Convert.ToUInt16("1000011000000000",2), // 0x08600, //  
                 Mnemonic = "STI",
-                ExecuteMethod = OperationProcessing.Sti,
-                Type = OperationType.Implicit,
-                Length = 2
-            },
-            new Operation()
-            {
-                OpCode = Convert.ToUInt16("1000011000100000",2), // 0x08620, //  
-                Mnemonic = "CLI",
-                ExecuteMethod = OperationProcessing.Cli,
+                ExecuteMethod = OperationProcessing.StiCli,
                 Type = OperationType.Implicit,
                 Length = 2
             },

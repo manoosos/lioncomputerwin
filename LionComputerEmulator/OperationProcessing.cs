@@ -6968,33 +6968,22 @@ namespace LionComputerEmulator
         #region Implicit Operations
 
         /// <summary>
-        /// Set Interrupt Flag
+        /// Set - Clear Interrupt Flag (bwb 0, 1)
         /// </summary>
-        public static void Sti(Operation operation)
+        public static void StiCli(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR |= State.I;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        /// <summary>
-        /// Clear Interrupt Flag
-        /// </summary>
-        public static void Cli(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            State.SR &= (byte)(State.I ^ 0x0ff);
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                State.SR |= State.I;
+            }
+            else
+            {
+                State.SR &= (byte)(State.I ^ 0x0ff);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
