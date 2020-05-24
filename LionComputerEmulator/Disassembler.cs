@@ -130,9 +130,8 @@ namespace LionComputerEmulator
 
         private static string StatusRegisterValue()
         {
-            return string.Format("{0}{1}{2}{3}{4}{5}{6}{7}",
+            return string.Format("{0}{1}{2}{3}{4}{5}{6}",
                 (State.SR & State.I) == State.I ? "I" : "-",
-                (State.SR & 0x040) == 0x040 ? "?" : "-",
                 (State.SR & State.T) == State.T ? "T" : "-",
                 (State.SR & State.D) == State.D ? "D" : "-",
                 (State.SR & State.N) == State.N ? "N" : "-",
@@ -305,6 +304,7 @@ namespace LionComputerEmulator
                 };
             }
             File.AppendAllLines(Utilities.RegDumpFilename, _memstr, Encoding.ASCII);
+            /*
             _memstr.Add("       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
             int cnt = 0;
             // dump the first $200 bytes, 64K are too much and in debug we can write to rom for test        
@@ -316,7 +316,8 @@ namespace LionComputerEmulator
                 _memstr.Add(_log.Trim());
                 cnt += 16;
             }
-            File.WriteAllLines("dump.txt", _memstr, Encoding.ASCII);
+            */
+            //File.WriteAllLines("dump.txt", _memstr, Encoding.ASCII);
 
             if (doMonitor)
             {

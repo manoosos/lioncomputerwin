@@ -27,10 +27,18 @@ namespace LionComputerEmulator
         /// </summary>
         public static void Execute()
         {
+#if DEBUG
+            ushort _oldpc = State.PC;
+#endif
             ushort memoryOpCodeValue = (ushort)((Memory.Data[State.PC] << 8) | Memory.Data[State.PC + 1]);
             int memoryOpCode = (memoryOpCodeValue & 0x0fe03);
             InstructionSet.OperationsList[memoryOpCode].OpCodeValue = memoryOpCodeValue;
             InstructionSet.OperationsList[memoryOpCode].Execute();
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(_oldpc, true);
+            Disassembler.doMonitor = false;
+#endif
         }
     }
 }

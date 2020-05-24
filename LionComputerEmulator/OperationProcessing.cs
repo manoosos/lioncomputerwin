@@ -127,10 +127,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             if ((operation.OpCodeValue & bwb) != 0)
@@ -142,10 +138,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = valuew;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -155,10 +147,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -169,10 +157,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -182,10 +166,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             if ((operation.OpCodeValue & bwb) != 0)
@@ -197,10 +177,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -210,10 +186,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             if ((operation.OpCodeValue & bwb) != 0)
@@ -225,10 +197,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -238,10 +206,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             if ((operation.OpCodeValue & bwb) == 0)
@@ -249,10 +213,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
             }
             Memory.Data[dstndx] = (byte)srcvalw;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -262,10 +222,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -277,10 +233,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
                 Memory.Data[dstndx] = (byte)srcvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -290,15 +242,11 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegRefRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                Memory.Data[State.A[dstndx]] = Memory.Data[State.A[srcndx]];
+                Memory.Data[dstndx] = Memory.Data[srcndx];
             }
             else
             {
@@ -306,10 +254,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
                 Memory.Data[dstndx] = (byte)srcvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -319,15 +263,11 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovRegRefMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                Memory.Data[State.A[dstndx]] = Memory.Data[srcndx];
+                Memory.Data[dstndx] = Memory.Data[srcndx];
             }
             else
             {
@@ -335,10 +275,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
                 Memory.Data[dstndx] = (byte)srcvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -348,10 +284,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovMemRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             if ((operation.OpCodeValue & bwb) != 0)
@@ -363,10 +295,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
                 Memory.Data[dstndx] = (byte)srcvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -376,18 +304,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovMemRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
             dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
             Memory.Data[dstndx] = (byte)srcvalw;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -397,15 +317,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovByteMemRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] = Memory.Data[State.PC + 5];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -415,15 +327,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void Gadr(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -433,10 +337,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07] + State.PC + operation.Length;
             if ((operation.OpCodeValue & bwb) == 0)
@@ -448,10 +348,6 @@ namespace LionComputerEmulator
                 State.A[dstndx] &= 0x0ff00;
                 State.A[dstndx] |= Memory.Data[srcndx];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -461,10 +357,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
             if ((operation.OpCodeValue & bwb) == 0)
@@ -476,10 +368,6 @@ namespace LionComputerEmulator
                 State.A[dstndx] &= 0x0ff00;
                 State.A[dstndx] |= Memory.Data[srcndx];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -489,10 +377,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrMemRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
             if ((operation.OpCodeValue & bwb) == 0)
@@ -504,10 +388,6 @@ namespace LionComputerEmulator
             {
                 Memory.Data[dstndx] = (byte)srcvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -517,10 +397,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrRegRefRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07] + State.PC + operation.Length;
             if ((operation.OpCodeValue & bwb) == 0)
@@ -528,10 +404,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = Memory.Data[srcndx++];
             }
             Memory.Data[dstndx] = Memory.Data[srcndx];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -541,10 +413,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrRegRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             if ((operation.OpCodeValue & bwb) == 0)
@@ -552,10 +420,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
             }
             Memory.Data[dstndx] = (byte)srcvalw;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -565,10 +429,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovrRegRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             if ((operation.OpCodeValue & bwb) == 0)
@@ -576,10 +436,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
             }
             Memory.Data[dstndx] = (byte)srcvalw;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -589,15 +445,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MoviRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -607,18 +455,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MoviByteRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= srcvalb;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -628,72 +468,40 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovhhRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(State.A[(operation.OpCodeValue >> 2) & 0x07] & 0x0ff00);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= (ushort)valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhhRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhhRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhhRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -703,72 +511,40 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovhlRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(State.A[(operation.OpCodeValue >> 2) & 0x07] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= (ushort)valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhlRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 3] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhlRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovhlRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
             State.A[dstndx] |= valuew;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -778,102 +554,54 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MovlhRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07] >> 8);
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= srcvalb;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovlhRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalb = Memory.Data[State.PC + 2];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= srcvalb;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovlhRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalb = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= srcvalb;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovlhRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalb = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= srcvalb;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovRegDirPc(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = State.PC;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void MovRegDirSp(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = State.SP;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -883,16 +611,8 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SwapRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = State.A[(operation.OpCodeValue >> 6) & 0x07];
             State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)((valuew << 8) | (valuew >> 8));
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -902,15 +622,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void GetSpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = State.SP;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -920,19 +632,11 @@ namespace LionComputerEmulator
         /// </summary>
         public static void XchgRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = (operation.OpCodeValue >> 2) & 0x07;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             State.A[dstndx] = State.A[srcndx];
             State.A[srcndx] = dstvalw;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -942,62 +646,30 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SetxRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.X = State.A[(operation.OpCodeValue >> 2) & 0x07];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetxImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.X = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetxRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.X = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetxMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.X = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1007,62 +679,30 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SetSpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SP = State.A[(operation.OpCodeValue >> 2) & 0x07];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetSpImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SP = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetSpRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.SP = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void SetSpMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.SP = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1073,15 +713,7 @@ namespace LionComputerEmulator
         //public static void MOVX(Operation operation)
         public static void MovxRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = State.X;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1091,15 +723,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PopRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] = PopFromStack();
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1109,15 +733,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PushRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack(State.A[(operation.OpCodeValue >> 6) & 0x07]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1127,15 +743,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PushImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1145,17 +753,9 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PushRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             valuew = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             PushToStack(valuew);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1165,17 +765,9 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PushMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             valuew = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             PushToStack(valuew);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1189,10 +781,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = State.A[dstndx];
@@ -1205,10 +793,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1218,10 +802,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = State.A[dstndx];
@@ -1239,10 +819,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1252,10 +828,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstvalw = State.A[dstndx];
@@ -1273,10 +845,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1286,10 +854,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstvalw = State.A[dstndx];
@@ -1302,10 +866,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1315,10 +875,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddMemRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
             dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
@@ -1335,10 +891,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1348,10 +900,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddMemRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
@@ -1368,10 +916,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1381,10 +925,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1399,10 +939,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1412,10 +948,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1430,10 +962,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1443,10 +971,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddSpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.SP;
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -1456,10 +980,6 @@ namespace LionComputerEmulator
             {
                 State.SP = AddAndSetFlagsWord(dstvalw, State.A[(operation.OpCodeValue >> 6) & 0x07], false, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1469,19 +989,11 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddSpImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.SP;
             if ((operation.OpCodeValue & bwb) != 0)
                 State.SP = AddAndSetFlagsByte(dstvalw, Memory.Data[State.PC + 3], false, false);
             else
                 State.SP = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, false);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1491,18 +1003,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubiRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
             dstvalw = State.A[dstndx];
             State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1512,10 +1016,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = State.A[dstndx];
@@ -1533,10 +1033,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1546,10 +1042,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstvalw = State.A[dstndx];
@@ -1567,10 +1059,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1580,10 +1068,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubMemRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
             dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
@@ -1600,10 +1084,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1613,10 +1093,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubMemRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
@@ -1633,10 +1109,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstvalw] = (byte)(result >> 8);
                 Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1646,16 +1118,8 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubSpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.SP;
             State.SP = AddAndSetFlagsWord(dstvalw, State.A[(operation.OpCodeValue >> 6) & 0x07], false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1665,16 +1129,8 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubSpImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.SP;
             State.SP = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1684,18 +1140,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AddiRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
             dstvalw = State.A[dstndx];
             State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1705,10 +1153,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = State.A[dstndx];
@@ -1721,10 +1165,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1734,10 +1174,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstvalw = State.A[dstndx];
@@ -1750,10 +1186,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1763,10 +1195,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1781,10 +1209,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1794,10 +1218,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SubRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1812,10 +1232,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1825,10 +1241,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AdcRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstvalw = State.A[dstndx];
@@ -1841,10 +1253,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1854,10 +1262,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AdcRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             dstvalw = State.A[dstndx];
@@ -1870,10 +1274,6 @@ namespace LionComputerEmulator
             {
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1883,10 +1283,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AdcRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1901,10 +1297,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1914,10 +1306,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AdcRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
@@ -1932,10 +1320,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -1945,10 +1329,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MuluRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
 
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -1990,10 +1370,6 @@ namespace LionComputerEmulator
                 // hi res only if reg to src reg
                 State.A[srcndx] = (ushort)(result >> 16);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2003,10 +1379,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MuluRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
 
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -2045,10 +1417,6 @@ namespace LionComputerEmulator
                 // low res in dest
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2058,10 +1426,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MuluRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
 
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2103,10 +1467,6 @@ namespace LionComputerEmulator
                 // low res in dest
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2116,10 +1476,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void MuluRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
 
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
@@ -2161,10 +1517,6 @@ namespace LionComputerEmulator
                 // low res in dest
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2174,18 +1526,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BtstRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << ((operation.OpCodeValue >> 2) & 0x0f)));
             State.SR &= (byte)(State.Z ^ byteAllBitsMask);
             if (result == 0)
                 State.SR |= State.Z;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2195,18 +1539,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BtstRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << State.A[(operation.OpCodeValue >> 2) & 0x07]));
             State.SR &= (byte)(State.Z ^ byteAllBitsMask);
             if (result == 0)
                 State.SR |= State.Z;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2216,15 +1552,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BsetRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] |= (ushort)(1 << ((operation.OpCodeValue >> 2) & 0x0f));
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2234,15 +1562,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BsetRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] |= (ushort)(1 << State.A[(operation.OpCodeValue >> 2) & 0x07]);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2252,15 +1572,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BclrRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] &= (ushort)((1 << ((operation.OpCodeValue >> 2) & 0x0f)) ^ wordAllBitsMask);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2270,15 +1582,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void BclrRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.A[(operation.OpCodeValue >> 6) & 0x07] &= (ushort)((1 << State.A[(operation.OpCodeValue >> 2) & 0x07]) ^ wordAllBitsMask);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2288,10 +1592,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void DecMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -2303,10 +1603,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(dstvalw >> 8);
                 Memory.Data[dstndx] = (byte)dstvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2316,10 +1612,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void IncMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -2331,10 +1623,6 @@ namespace LionComputerEmulator
                 Memory.Data[dstndx++] = (byte)(dstvalw >> 8);
                 Memory.Data[dstndx] = (byte)dstvalw;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2344,10 +1632,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void IncRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
 
             if ((operation.OpCodeValue & bwb) != 0)
@@ -2361,10 +1645,6 @@ namespace LionComputerEmulator
                 result = AddAndSetFlagsWord(State.A[dstndx], 1, false, false);
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2374,10 +1654,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void DecRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
 
             if ((operation.OpCodeValue & bwb) != 0)
@@ -2391,10 +1667,6 @@ namespace LionComputerEmulator
                 result = AddAndSetFlagsWord(State.A[dstndx], 1, false, true);
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2404,10 +1676,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AndRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2432,10 +1700,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2445,10 +1709,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AndRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -2473,10 +1733,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2486,10 +1742,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AndRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2520,10 +1772,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2533,10 +1781,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void AndRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
@@ -2567,10 +1811,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2580,10 +1820,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void OrRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2608,10 +1844,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2621,10 +1853,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void OrRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -2649,10 +1877,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2662,10 +1886,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void OrRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2696,10 +1916,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2709,10 +1925,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void OrRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
@@ -2743,10 +1955,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2756,10 +1964,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void XorRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2784,10 +1988,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2797,10 +1997,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void XorRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -2825,10 +2021,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2838,10 +2030,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void XorRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -2872,10 +2060,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2885,10 +2069,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void XorRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
@@ -2919,10 +2099,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2932,10 +2108,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void NotRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR &= 0x0fff0;
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             result = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
@@ -2958,10 +2130,6 @@ namespace LionComputerEmulator
 
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -2971,10 +2139,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void NegRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
 
@@ -2989,10 +2153,6 @@ namespace LionComputerEmulator
                 result = AddAndSetFlagsWord(dstvalw, 1, false, false);
                 State.A[dstndx] = (ushort)result;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3002,10 +2162,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void RolRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3021,10 +2177,6 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] = (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3034,10 +2186,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SraRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3057,10 +2205,6 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] = (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3070,10 +2214,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SlaRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3090,10 +2230,6 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] = (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3103,10 +2239,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SrlRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3123,10 +2255,6 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] = (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3136,10 +2264,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SrllRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = (operation.OpCodeValue >> 2) & 0x07;
             dstvalw = State.A[dstndx];
@@ -3158,10 +2282,6 @@ namespace LionComputerEmulator
             else if ((State.A[dstndx] & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3171,10 +2291,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SrlByteRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalb = (byte)State.A[dstndx];
             srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3192,10 +2308,6 @@ namespace LionComputerEmulator
 
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3205,10 +2317,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SllRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalw = State.A[dstndx];
             srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3225,10 +2333,6 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] = (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3238,10 +2342,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SlllRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             srcndx = (operation.OpCodeValue >> 2) & 0x07;
             dstvalw = State.A[dstndx];
@@ -3260,10 +2360,6 @@ namespace LionComputerEmulator
             else if ((State.A[dstndx] & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3273,10 +2369,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SllByteRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = (operation.OpCodeValue >> 6) & 0x07;
             dstvalb = (byte)State.A[dstndx];
             srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
@@ -3294,10 +2386,6 @@ namespace LionComputerEmulator
 
             State.A[dstndx] &= 0x0ff00;
             State.A[dstndx] |= (ushort)result;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3307,10 +2395,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void SrClr(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((operation.OpCodeValue & bwb) == 0)
             {
 
@@ -3321,10 +2405,6 @@ namespace LionComputerEmulator
                 State.SR |= (byte)(1 << (operation.OpCodeValue >> 2) & 0x07);
             }
 
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3338,10 +2418,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpMemRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if ((operation.OpCodeValue & bwb) != 0)
@@ -3352,10 +2428,6 @@ namespace LionComputerEmulator
             {
                 result = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]), State.A[(operation.OpCodeValue >> 2) & 0x07], false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3365,10 +2437,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpMemRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if ((operation.OpCodeValue & bwb) != 0)
@@ -3379,10 +2447,6 @@ namespace LionComputerEmulator
             {
                 result = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]), (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]), false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3392,10 +2456,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
@@ -3407,10 +2467,6 @@ namespace LionComputerEmulator
             {
                 result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3420,10 +2476,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
             //srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
@@ -3435,10 +2487,6 @@ namespace LionComputerEmulator
             {
                 result = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3448,10 +2496,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
@@ -3465,10 +2509,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3478,10 +2518,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
@@ -3495,10 +2531,6 @@ namespace LionComputerEmulator
                 srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
                 result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3508,10 +2540,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegRefRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
@@ -3525,10 +2553,6 @@ namespace LionComputerEmulator
                 dstvalw = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
                 result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3538,10 +2562,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegRefImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
@@ -3553,10 +2573,6 @@ namespace LionComputerEmulator
                 //dstvalw = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
                 result = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]), (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3566,10 +2582,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpRegRefRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
@@ -3581,10 +2593,6 @@ namespace LionComputerEmulator
             {
                 result = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]), (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]), false, true);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3594,15 +2602,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpiByteRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             result = AddAndSetFlagsByte(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3612,15 +2612,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmpiRegDirImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             result = AddAndSetFlagsWord(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3630,18 +2622,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmphRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
             srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07]);
             //srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07] >> 8);
             result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3651,18 +2635,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmphRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
             srcvalb = Memory.Data[State.PC];
             //srcvalb = Memory.Data[State.PC + 2];
             result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3672,18 +2648,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmphRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
             srcvalb = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
             //srcvalb = Memory.Data[(State.A[(operation.OpCodeValue >> 2) & 0x07]) - 1];
             result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3693,19 +2661,11 @@ namespace LionComputerEmulator
         /// </summary>
         public static void CmphRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
             srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             srcvalb = Memory.Data[srcndx];
             //srcvalb = Memory.Data[srcndx - 1];
             result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -3719,10 +2679,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpxRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -3733,10 +2689,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3744,10 +2696,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpxImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -3758,10 +2706,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3769,10 +2713,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpxRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -3784,10 +2724,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3795,10 +2731,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpxMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -3810,10 +2742,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3821,10 +2749,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JxaRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -3848,10 +2772,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3859,10 +2779,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JxaImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -3886,10 +2802,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3897,10 +2809,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JxaRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -3925,10 +2833,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3936,10 +2840,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JxaMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -3964,10 +2864,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -3975,10 +2871,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaeRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
@@ -3989,10 +2881,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4000,10 +2888,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaeImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
@@ -4014,10 +2898,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4025,10 +2905,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaeRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
@@ -4040,10 +2916,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4051,10 +2923,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaeMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
@@ -4066,10 +2934,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4077,10 +2941,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
         }
 
@@ -4089,10 +2949,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
         }
 
@@ -4101,10 +2957,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
         }
@@ -4114,10 +2966,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JmpMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
         }
@@ -4127,10 +2975,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnzRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4140,10 +2984,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4151,10 +2991,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnzImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4164,10 +3000,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4175,10 +3007,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnzRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4189,10 +3017,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4200,10 +3024,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnzMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4214,10 +3034,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4225,10 +3041,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnoRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4238,10 +3050,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4249,10 +3057,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnoImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4262,10 +3066,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4273,10 +3073,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnoRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4287,10 +3083,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4298,10 +3090,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JnoMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4312,10 +3100,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4323,10 +3107,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JncRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4336,10 +3116,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4347,10 +3123,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JncImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4360,10 +3132,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4371,10 +3139,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JncRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4385,10 +3149,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4396,10 +3156,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JncMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4410,10 +3166,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4421,10 +3173,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JpRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4434,10 +3182,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4445,10 +3189,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JpImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4458,10 +3198,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4469,10 +3205,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JpRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -4483,10 +3215,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4494,10 +3222,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JpMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -4508,10 +3232,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4519,10 +3239,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JbeRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -4533,10 +3249,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4544,10 +3256,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JbeImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -4558,10 +3266,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4569,10 +3273,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JbeRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -4584,10 +3284,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4595,10 +3291,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JbeMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -4610,10 +3302,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4621,10 +3309,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -4635,10 +3319,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4646,10 +3326,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -4660,10 +3336,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4671,10 +3343,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -4686,10 +3354,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4697,10 +3361,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JaMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -4712,10 +3372,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4723,10 +3379,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JlRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4737,10 +3389,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4748,10 +3396,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JlImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4762,10 +3406,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4773,10 +3413,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JlRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4788,10 +3424,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4799,10 +3431,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JlMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4814,10 +3442,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4825,10 +3449,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JsrRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
         }
@@ -4838,10 +3458,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JsrImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
         }
@@ -4851,10 +3467,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JsrRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
@@ -4865,10 +3477,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JsrMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
@@ -4879,10 +3487,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JleRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4893,10 +3497,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4904,10 +3504,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JleImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4918,10 +3514,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4929,10 +3521,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JleRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4944,10 +3532,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4955,10 +3539,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JleMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -4970,10 +3550,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -4981,10 +3557,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -4995,10 +3567,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5006,10 +3574,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5020,10 +3584,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5031,10 +3591,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5046,10 +3602,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5057,10 +3609,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5072,10 +3620,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5083,10 +3627,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgeRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5097,10 +3637,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5108,10 +3644,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgeImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5122,10 +3654,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5133,10 +3661,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgeRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5148,10 +3672,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5159,10 +3679,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JgeMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -5174,10 +3690,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5185,10 +3697,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void IntImdQuick(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // load vector
             dstndx = (operation.OpCodeValue >> 2) & 0x0f;
             // treat spi-disk interrupt and functions
@@ -5231,10 +3739,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
         }
 
@@ -5243,10 +3747,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
         }
 
@@ -5255,10 +3755,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
         }
@@ -5268,10 +3764,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
         }
@@ -5281,10 +3773,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnzRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
@@ -5294,10 +3782,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5305,10 +3789,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnzImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
@@ -5318,10 +3798,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5329,10 +3805,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnzRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -5343,10 +3815,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5354,10 +3822,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnzMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -5368,10 +3832,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5379,10 +3839,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JraRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -5393,10 +3849,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5404,10 +3856,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JraImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -5418,10 +3866,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5429,10 +3873,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JraRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -5444,10 +3884,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5455,10 +3891,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JraMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
@@ -5470,10 +3902,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5481,10 +3909,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
@@ -5494,10 +3918,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5505,10 +3925,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
@@ -5518,10 +3934,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5529,10 +3941,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) != 0)
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -5543,10 +3951,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5554,10 +3958,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrnMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.N) != 0)
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -5568,10 +3968,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5579,10 +3975,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JroRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
@@ -5592,10 +3984,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5603,10 +3991,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JroImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
@@ -5616,10 +4000,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5627,10 +4007,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JroRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) != 0)
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -5641,10 +4017,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5652,10 +4024,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JroMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.O) != 0)
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -5666,10 +4034,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5677,10 +4041,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrcRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
@@ -5690,10 +4050,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5701,10 +4057,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrcImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
@@ -5714,10 +4066,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5725,10 +4073,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrcRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) != 0)
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -5739,10 +4083,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5750,10 +4090,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrcMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((State.SR & State.C) != 0)
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -5764,10 +4100,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5775,10 +4107,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrsrRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
         }
@@ -5788,10 +4116,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrsrImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
         }
@@ -5801,10 +4125,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrsrRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
@@ -5815,17 +4135,9 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrsrMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             PushToStack((ushort)(State.PC + operation.Length));
             valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5833,10 +4145,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrbeRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -5847,10 +4155,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5858,10 +4162,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrbeImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -5872,10 +4172,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5883,10 +4179,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrbeRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -5898,10 +4190,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5909,10 +4197,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrbeMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
@@ -5924,10 +4208,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5935,10 +4215,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrleRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -5949,10 +4225,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5960,10 +4232,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrleImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -5974,10 +4242,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -5985,10 +4249,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrleRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6000,10 +4260,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6011,10 +4267,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrleMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6026,10 +4278,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6037,10 +4285,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrlRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6051,10 +4295,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6062,10 +4302,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrlImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6076,10 +4312,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6087,10 +4319,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrlRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6102,10 +4330,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6113,10 +4337,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrlMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
@@ -6128,10 +4348,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6139,10 +4355,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
@@ -6153,10 +4365,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6164,10 +4372,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
@@ -6178,10 +4382,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6189,10 +4389,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
@@ -6204,10 +4400,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6215,10 +4407,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
@@ -6230,10 +4418,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6241,10 +4425,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxaRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -6268,10 +4448,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6279,10 +4455,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxaImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -6306,10 +4478,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6317,10 +4485,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxaRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -6345,10 +4509,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6356,10 +4516,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrxaMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if (State.X != 0)
             {
                 dstndx = (operation.OpCodeValue >> 6) & 0x07;
@@ -6384,10 +4540,6 @@ namespace LionComputerEmulator
                 State.PC += operation.Length;
             }
             State.X--;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6395,10 +4547,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6409,10 +4557,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6420,10 +4564,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6434,10 +4574,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6445,10 +4581,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6460,10 +4592,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6471,10 +4599,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6486,10 +4610,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6497,10 +4617,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgeRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6511,10 +4627,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6522,10 +4634,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgeImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6536,10 +4644,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6547,10 +4651,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgeRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6562,10 +4662,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
 
         /// <summary>
@@ -6573,10 +4669,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void JrgeMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
@@ -6588,10 +4680,6 @@ namespace LionComputerEmulator
                 //WaitForCycles(operation.Cycles);
                 State.PC += operation.Length;
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
         }
         #endregion
 
@@ -6599,10 +4687,6 @@ namespace LionComputerEmulator
 
         public static void OutRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcndx = (operation.OpCodeValue >> 2) & 0x07;
 
@@ -6616,20 +4700,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = State.A[srcndx];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutByteRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
@@ -6640,20 +4716,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = (byte)State.A[(operation.OpCodeValue >> 2) & 0x07];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
             srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
@@ -6667,20 +4735,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = (ushort)(Memory.Data[srcvalw++] << 8 | Memory.Data[srcvalw]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
@@ -6693,20 +4753,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutByteRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
@@ -6717,20 +4769,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = Memory.Data[State.PC + 3];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutImdImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
@@ -6743,20 +4787,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutImdRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             srcndx = (operation.OpCodeValue >> 2) & 0x07;
 
@@ -6770,20 +4806,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = State.A[srcndx];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void OutByteImdRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
@@ -6794,20 +4822,12 @@ namespace LionComputerEmulator
             {
                 Device.Port[portnum] = (byte)State.A[(operation.OpCodeValue >> 2) & 0x07];
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void InRegDirRegDir(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = State.A[(operation.OpCodeValue >> 2) & 0x07];
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -6834,20 +4854,12 @@ namespace LionComputerEmulator
                     State.A[(operation.OpCodeValue >> 6) & 0x07] = Device.Port[portnum];
                 }
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void InRegDirImd(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -6874,20 +4886,12 @@ namespace LionComputerEmulator
                     State.A[(operation.OpCodeValue >> 6) & 0x07] = Device.Port[portnum];
                 }
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void InRegDirRegRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -6914,20 +4918,12 @@ namespace LionComputerEmulator
                     State.A[(operation.OpCodeValue >> 6) & 0x07] = Device.Port[portnum];
                 }
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
 
         public static void InRegDirMemRef(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             portnum = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -6955,10 +4951,6 @@ namespace LionComputerEmulator
                     State.A[(operation.OpCodeValue >> 6) & 0x07] = Device.Port[portnum];
                 }
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -6972,10 +4964,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void StiCli(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((operation.OpCodeValue & bwb) == 0)
             {
                 State.SR |= State.I;
@@ -6984,10 +4972,6 @@ namespace LionComputerEmulator
             {
                 State.SR &= (byte)(State.I ^ 0x0ff);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -6997,18 +4981,10 @@ namespace LionComputerEmulator
         /// </summary>
         public static void Reti(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // restore sr we came
             State.SR = (byte)PopFromStack();
             // pop pc
             State.PC = PopFromStack();
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
         }
 
@@ -7017,16 +4993,8 @@ namespace LionComputerEmulator
         /// </summary>
         public static void Ret(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             // pop pc
             State.PC = PopFromStack();
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
         }
 
@@ -7035,15 +5003,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PopX(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.X = PopFromStack();
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -7053,15 +5013,7 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PopSr(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             State.SR = (byte)PopFromStack();
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -7071,10 +5023,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void PushSrX(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 PushToStack(State.SR);
@@ -7083,10 +5031,6 @@ namespace LionComputerEmulator
             {
                 PushToStack(State.X);
             }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -7096,11 +5040,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void Nop(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
@@ -7110,11 +5049,6 @@ namespace LionComputerEmulator
         /// </summary>
         public static void UNDEFINED(Operation operation)
         {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
             //throw new Exception(string.Format("PC:{0} opcode:{1} mnemonic:{2} error:ILLEGAL INSTRUCTION!!!", Convert.ToString(State.PC, 16).ToUpper().PadLeft(4, '0'), operation.Operands[0].Symbol, operation.Mnemonic));
