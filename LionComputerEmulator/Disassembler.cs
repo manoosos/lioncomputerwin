@@ -252,7 +252,15 @@ namespace LionComputerEmulator
             {
                 instruction.DebugText += instruction.Operands.Count() > 0 ? " " + instruction.Operands[0].Symbol + "," : string.Empty;
             }
-            instruction.DebugText += instruction.Operands.Count() > 1 ? instruction.Operands[1].Symbol : string.Empty;
+            // GETSP
+            if (instruction.Type == OperationType.Memory && instruction.AddressingModeSource == AddressingMode.StackPointer)
+            {
+                instruction.DebugText = "GETSP" + " " + instruction.Operands[0].Symbol;
+            }
+            else
+            {
+                instruction.DebugText += instruction.Operands.Count() > 1 ? instruction.Operands[1].Symbol : string.Empty;
+            }
 
             return instruction;
         }
@@ -415,9 +423,19 @@ namespace LionComputerEmulator
             //else if (instruction == null)
             //    throw new Exception("oh no no no no...");
 
+            ushort opcode = (ushort)(instruction.OpCodeValue & 0x0fe00);
             if (instruction.Type == OperationType.Implicit)
             {
-                // decode nothing, opcode passed as is
+                // specific with bwb, correct mnemonic else passed as is
+                if ((instruction.OpCodeValue & 0x020) > 0)
+                {
+                    switch (opcode)
+                    {
+                        case 0x08600:
+                            instruction.Mnemonic = "CLI";
+                            break;
+                    }
+                }
                 return instruction;
             }
             else
@@ -425,7 +443,6 @@ namespace LionComputerEmulator
                 // specific with bwb, correct mnemonic
                 if ((instruction.OpCodeValue & 0x020) > 0)
                 {
-                    ushort opcode = (ushort)(instruction.OpCodeValue & 0x0fe00);
                     switch (opcode)
                     {
                         case 0x04e00:
@@ -450,10 +467,6 @@ namespace LionComputerEmulator
 
                         case 0x04c00:
                             instruction.Mnemonic = "SRSET";
-                            break;
-
-                        case 0x08600:
-                            instruction.Mnemonic = "CLI";
                             break;
                     }
                 }
