@@ -7,12 +7,25 @@ namespace LionComputerEmulator
         // xor bits and masks for arithmetic operations
         private const ushort wordHiBitMask = 0x08000;
         private const ushort wordAllBitsMask = 0x0ffff;
-        private const int wordCarryMask = 0x010000;
         private const ushort byteHiBitMask = 0x080;
         private const ushort byteAllBitsMask = 0x0ff;
         private const int byteCarryMask = 0x0100;
 
+        // bytewide bit mask
         private const ushort bwb = 0x020;
+
+        // vars used
+        private static byte dstvalb;
+        private static byte srcvalb;
+        private static int dstndx;
+        private static int srcndx;
+        private static int portnum;
+        private static int result;
+        private static int calcValue;
+        private static long resultlong;
+        private static ushort valuew;
+        private static ushort dstvalw;
+        private static ushort srcvalw;
 
         /// <summary>
         /// Wait for n Cycles to emulate native speed
@@ -47,18 +60,12 @@ namespace LionComputerEmulator
         /// </summary>
         private static ushort AddAndSetFlagsWord(ushort dstValue, ushort srcValue, bool useCarry, bool subtract)
         {
-            int srcCalcValue;
-
-            if (subtract)
-                srcCalcValue = (srcValue ^ wordAllBitsMask) + 1;
-            else
-                srcCalcValue = srcValue;
-
-            int result = dstValue + srcCalcValue;
+            calcValue = subtract ? (srcValue ^ wordAllBitsMask) + 1 : srcValue;
+            result = dstValue + calcValue;
             if (useCarry)
                 result += State.SR & State.C;
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
             if (((result & (wordAllBitsMask + 1)) != 0) ^ subtract)
                 State.SR |= State.C;
@@ -67,9 +74,9 @@ namespace LionComputerEmulator
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
             // overflow on msbit: dst 0 src 0 res 1, dst 1 src 1 res 0
-            if (((dstValue & wordHiBitMask) | (srcCalcValue & wordHiBitMask) | ((result ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+            if (((dstValue & wordHiBitMask) | (calcValue & wordHiBitMask) | ((result ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                 State.SR |= State.O;
-            else if ((((dstValue ^ wordAllBitsMask) & wordHiBitMask) | ((srcCalcValue ^ wordAllBitsMask) & wordHiBitMask) | (result & wordHiBitMask)) == 0)
+            else if ((((dstValue ^ wordAllBitsMask) & wordHiBitMask) | ((calcValue ^ wordAllBitsMask) & wordHiBitMask) | (result & wordHiBitMask)) == 0)
                 State.SR |= State.O;
 
             return (ushort)result;
@@ -80,21 +87,15 @@ namespace LionComputerEmulator
         /// </summary>
         private static byte AddAndSetFlagsByte(ushort dstValue, ushort srcValue, bool useCarry, bool subtract)
         {
-            int srcCalcValue;
-
             srcValue &= byteAllBitsMask;
             dstValue &= byteAllBitsMask; // strip byte anyway
 
-            if (subtract)
-                srcCalcValue = (srcValue ^ byteAllBitsMask) + 1;
-            else
-                srcCalcValue = srcValue;
-
-            int result = dstValue + srcCalcValue;
+            calcValue = subtract ? (srcValue ^ byteAllBitsMask) + 1 : srcValue;
+            result = dstValue + calcValue;
             if (useCarry)
                 result += State.SR & State.C;
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
             if (((result & (byteCarryMask)) != 0) ^ subtract)
                 State.SR |= State.C;
@@ -103,9 +104,9 @@ namespace LionComputerEmulator
             else if ((result & byteHiBitMask) == byteHiBitMask)
                 State.SR |= State.N;
             // overflow on msbit: dst 0 src 0 res 1, dst 1 src 1 res 0
-            if (((dstValue & byteHiBitMask) | (srcCalcValue & byteHiBitMask) | ((result ^ byteAllBitsMask) & byteHiBitMask)) == 0)
+            if (((dstValue & byteHiBitMask) | (calcValue & byteHiBitMask) | ((result ^ byteAllBitsMask) & byteHiBitMask)) == 0)
                 State.SR |= State.O;
-            else if ((((dstValue ^ byteAllBitsMask) & byteHiBitMask) | ((srcCalcValue ^ byteAllBitsMask) & byteHiBitMask) | (result & byteHiBitMask)) == 0)
+            else if ((((dstValue ^ byteAllBitsMask) & byteHiBitMask) | ((calcValue ^ byteAllBitsMask) & byteHiBitMask) | (result & byteHiBitMask)) == 0)
                 State.SR |= State.O;
 
             return (byte)result;
@@ -130,8 +131,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            State.A[(operation.OpCodeValue >> 6) & 0x07] = val;
+            valuew = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= (byte)valuew;
+            }
+            else
+            {
+                State.A[dstndx] = valuew;
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -149,8 +159,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            State.A[(operation.OpCodeValue >> 6) & 0x07] = val;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= Memory.Data[State.PC + 3];
+            }
+            else
+            {
+                State.A[dstndx] = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -168,8 +186,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= Memory.Data[srcndx];
+            }
+            else
+            {
+                State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -187,8 +214,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            srcndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= Memory.Data[srcndx];
+            }
+            else
+            {
+                State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -206,10 +242,13 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+            }
+            Memory.Data[dstndx] = (byte)srcvalw;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -227,10 +266,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcval = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                Memory.Data[dstndx] = Memory.Data[State.PC + 3];
+            }
+            else
+            {
+                srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+                Memory.Data[dstndx] = (byte)srcvalw;
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -248,11 +294,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int srcval = Memory.Data[srcndx++] << 8 | Memory.Data[srcndx];
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                Memory.Data[State.A[dstndx]] = Memory.Data[State.A[srcndx]];
+            }
+            else
+            {
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+                Memory.Data[dstndx] = (byte)srcvalw;
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -270,11 +323,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int srcval = Memory.Data[srcndx++] << 8 | Memory.Data[srcndx];
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                Memory.Data[State.A[dstndx]] = Memory.Data[srcndx];
+            }
+            else
+            {
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+                Memory.Data[dstndx] = (byte)srcvalw;
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -292,10 +352,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                Memory.Data[dstndx] = (byte)srcvalw;
+            }
+            else
+            {
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+                Memory.Data[dstndx] = (byte)srcvalw;
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -313,28 +380,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcval = Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5];
-            int dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            Memory.Data[dstndx++] = (byte)(srcval >> 8);
-            Memory.Data[dstndx] = (byte)srcval;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        /// <summary>
-        /// Move Register Reference to Memory Reference
-        /// </summary>
-        public static void MovByteMemRefRegDir(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] = (byte)State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
+            dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+            Memory.Data[dstndx] = (byte)srcvalw;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -353,142 +402,6 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] = Memory.Data[State.PC + 5];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegRefRegDir(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            Memory.Data[State.A[(operation.OpCodeValue >> 6) & 0x07]] = (byte)srcval;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegRefImd(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            Memory.Data[State.A[(operation.OpCodeValue >> 6) & 0x07]] = Memory.Data[State.PC + 3];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegRefRegRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            Memory.Data[State.A[(operation.OpCodeValue >> 6) & 0x07]] = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegRefMemRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            Memory.Data[State.A[(operation.OpCodeValue >> 6) & 0x07]] = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        /// <summary>
-        /// Move Address Byte to Address
-        /// </summary>
-        public static void MovByteRegDirRegDir(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            byte val = (byte)State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegDirImd(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            byte val = Memory.Data[State.PC + 3];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegDirRegRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= Memory.Data[srcndx];
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        public static void MovByteRegDirMemRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            byte val = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -516,6 +429,34 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
+        /// Move Relative Register to Register
+        /// </summary>
+        public static void MovrRegDirRegRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07] + State.PC + operation.Length;
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            }
+            else
+            {
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= Memory.Data[srcndx];
+            }
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+            //WaitForCycles(operation.Cycles);
+            State.PC += operation.Length;
+        }
+
+        /// <summary>
         /// Move Relative Memory to Register
         /// </summary>
         public static void MovrRegDirMemRef(Operation operation)
@@ -524,16 +465,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort memndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
             if ((operation.OpCodeValue & bwb) == 0)
             {
-                State.A[dstndx] = (ushort)(Memory.Data[memndx++] << 8 | Memory.Data[memndx]);
+                State.A[dstndx] = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= Memory.Data[memndx];
+                State.A[dstndx] |= Memory.Data[srcndx];
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -552,17 +493,89 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort memndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (ushort)((Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]) + State.PC + operation.Length);
             if ((operation.OpCodeValue & bwb) == 0)
             {
-                Memory.Data[memndx++] = (byte)(srcval >> 8);
-                Memory.Data[memndx] = (byte)srcval;
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+                Memory.Data[dstndx] = (byte)srcvalw;
             }
             else
             {
-                Memory.Data[memndx] = (byte)srcval;
+                Memory.Data[dstndx] = (byte)srcvalw;
             }
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+            //WaitForCycles(operation.Cycles);
+            State.PC += operation.Length;
+        }
+
+        /// <summary>
+        /// Move Relative Register to Relative Register
+        /// </summary>
+        public static void MovrRegRefRegRef(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07] + State.PC + operation.Length;
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                Memory.Data[dstndx++] = Memory.Data[srcndx++];
+            }
+            Memory.Data[dstndx] = Memory.Data[srcndx];
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+            //WaitForCycles(operation.Cycles);
+            State.PC += operation.Length;
+        }
+
+        /// <summary>
+        /// Move Register to Relative Register
+        /// </summary>
+        public static void MovrRegRefRegDir(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+            }
+            Memory.Data[dstndx] = (byte)srcvalw;
+#if DEBUG
+            Disassembler.Monitor(State.PC, true);
+            Disassembler.doMonitor = false;
+#endif
+            //WaitForCycles(operation.Cycles);
+            State.PC += operation.Length;
+        }
+
+        /// <summary>
+        /// Move Immediate to Relative Register
+        /// </summary>
+        public static void MovrRegRefImd(Operation operation)
+        {
+#if DEBUG
+            Disassembler.doMonitor = true;
+            Disassembler.Monitor(State.PC);
+#endif
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07] + State.PC + operation.Length;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+                Memory.Data[dstndx++] = (byte)(srcvalw >> 8);
+            }
+            Memory.Data[dstndx] = (byte)srcvalw;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -598,10 +611,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte val = (byte)((operation.OpCodeValue >> 2) & 0x0f);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= srcvalb;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -619,10 +632,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = State.A[(operation.OpCodeValue >> 2) & 0x07] & 0x0ff00;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(State.A[(operation.OpCodeValue >> 2) & 0x07] & 0x0ff00);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= (ushort)val;
+            State.A[dstndx] |= (ushort)valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -637,10 +650,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[State.PC + 2] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -655,10 +668,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -673,10 +686,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -694,10 +707,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = State.A[(operation.OpCodeValue >> 2) & 0x07] << 8;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(State.A[(operation.OpCodeValue >> 2) & 0x07] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= (ushort)val;
+            State.A[dstndx] |= (ushort)valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -712,10 +725,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[State.PC + 3] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[State.PC + 3] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -730,10 +743,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -748,10 +761,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort val = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            valuew = (ushort)(Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]] << 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= valuew;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -769,10 +782,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte val = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07] >> 8);
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07] >> 8);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= srcvalb;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -787,10 +800,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte val = Memory.Data[State.PC + 2];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalb = Memory.Data[State.PC + 2];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= srcvalb;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -805,10 +818,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte val = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalb = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= srcvalb;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -823,10 +836,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte val = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalb = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= val;
+            State.A[dstndx] |= srcvalb;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -874,8 +887,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)((val << 8) | (val >> 8));
+            valuew = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            State.A[(operation.OpCodeValue >> 6) & 0x07] = (ushort)((valuew << 8) | (valuew >> 8));
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -911,11 +924,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = (operation.OpCodeValue >> 2) & 0x07;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstndx];
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
             State.A[dstndx] = State.A[srcndx];
-            State.A[srcndx] = dstval;
+            State.A[srcndx] = dstvalw;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -963,7 +976,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.X = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -979,8 +992,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.X = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.X = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1028,7 +1041,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.SP = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1044,8 +1057,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.SP = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.SP = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1136,9 +1149,9 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort val = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-            PushToStack(val);
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            valuew = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            PushToStack(valuew);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1156,9 +1169,9 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort val = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-            PushToStack(val);
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            valuew = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+            PushToStack(valuew);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1180,17 +1193,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, false, false);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, false, false);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, false);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1209,23 +1222,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
 
-            int result;
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1244,23 +1256,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
 
-            int result;
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1279,17 +1290,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, false, false);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, false, false);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, false);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1308,21 +1319,21 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort srcval = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
-            ushort dstval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            int result;
+            srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
+            dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1331,7 +1342,6 @@ namespace LionComputerEmulator
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
-
 
         /// <summary>
         /// Add Register Direct to Memory Referenced 
@@ -1342,21 +1352,21 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            int result;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, false);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, false);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1365,7 +1375,6 @@ namespace LionComputerEmulator
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
-
 
         /// <summary>
         /// Add Register Reference to Register
@@ -1376,20 +1385,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], false, false);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], false, false);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, false);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1408,20 +1416,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[dstregndx] &= 0x0ff00;
-                State.A[dstregndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], false, false);
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], false, false);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstregndx] = AddAndSetFlagsWord(dstval, srcval, false, false);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1440,8 +1447,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.SP;
-            State.SP = AddAndSetFlagsWord(dstval, State.A[(operation.OpCodeValue >> 6) & 0x07], false, false);
+            dstvalw = State.SP;
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                State.SP = AddAndSetFlagsByte(dstvalw, State.A[(operation.OpCodeValue >> 6) & 0x07], false, false);
+            }
+            else
+            {
+                State.SP = AddAndSetFlagsWord(dstvalw, State.A[(operation.OpCodeValue >> 6) & 0x07], false, false);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1459,8 +1473,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.SP;
-            State.SP = AddAndSetFlagsWord(dstval, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, false);
+            dstvalw = State.SP;
+            if ((operation.OpCodeValue & bwb) != 0)
+                State.SP = AddAndSetFlagsByte(dstvalw, Memory.Data[State.PC + 3], false, false);
+            else
+                State.SP = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, false);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1478,10 +1495,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
-            ushort dstval = State.A[dstndx];
-            State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, true);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstvalw = State.A[dstndx];
+            State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1499,23 +1516,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
 
-            int result;
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1534,23 +1550,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
 
-            int result;
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1559,7 +1574,6 @@ namespace LionComputerEmulator
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
-
 
         /// <summary>
         /// Sub Immediate from Memory Referenced 
@@ -1570,21 +1584,21 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort srcval = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
-            ushort dstval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            int result;
+            srcvalw = (ushort)(Memory.Data[State.PC + 4] << 8 | Memory.Data[State.PC + 5]);
+            dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1593,7 +1607,6 @@ namespace LionComputerEmulator
             //WaitForCycles(operation.Cycles);
             State.PC += operation.Length;
         }
-
 
         /// <summary>
         /// Sub Register Direct from Memory Referenced 
@@ -1604,21 +1617,21 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            int result;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                ushort memvalue = (ushort)(Memory.Data[dstval]);
-                result = AddAndSetFlagsByte(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result & 0x00FF);
+                valuew = (ushort)(Memory.Data[dstvalw]);
+                result = AddAndSetFlagsByte(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result & 0x00FF);
             }
             else
             {
-                ushort memvalue = (ushort)((Memory.Data[dstval] << 8) + Memory.Data[dstval + 1]);
-                result = AddAndSetFlagsWord(memvalue, srcval, false, true);
-                Memory.Data[dstval] = (byte)(result >> 8);
-                Memory.Data[dstval + 1] = (byte)(result & 0x00FF);
+                valuew = (ushort)((Memory.Data[dstvalw] << 8) + Memory.Data[dstvalw + 1]);
+                result = AddAndSetFlagsWord(valuew, srcvalw, false, true);
+                Memory.Data[dstvalw] = (byte)(result >> 8);
+                Memory.Data[dstvalw + 1] = (byte)(result & 0x00FF);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1637,8 +1650,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.SP;
-            State.SP = AddAndSetFlagsWord(dstval, State.A[(operation.OpCodeValue >> 6) & 0x07], false, true);
+            dstvalw = State.SP;
+            State.SP = AddAndSetFlagsWord(dstvalw, State.A[(operation.OpCodeValue >> 6) & 0x07], false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1656,8 +1669,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.SP;
-            State.SP = AddAndSetFlagsWord(dstval, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
+            dstvalw = State.SP;
+            State.SP = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1675,10 +1688,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
-            ushort dstval = State.A[dstndx];
-            State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, false);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstvalw = State.A[dstndx];
+            State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, false);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -1696,17 +1709,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, false, true);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, true);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1725,17 +1738,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, false, true);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, false, true);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1754,20 +1767,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[dstregndx] &= 0x0ff00;
-                State.A[dstregndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], false, true);
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], false, true);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstregndx] = AddAndSetFlagsWord(dstval, srcval, false, true);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1786,20 +1798,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[dstregndx] &= 0x0ff00;
-                State.A[dstregndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], false, true);
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], false, true);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstregndx] = AddAndSetFlagsWord(dstval, srcval, false, true);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1818,17 +1829,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, true, false);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, true, false);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, true, false);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1847,17 +1858,17 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= AddAndSetFlagsByte(dstval, srcval, true, false);
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, srcvalw, true, false);
             }
             else
             {
-                State.A[dstndx] = AddAndSetFlagsWord(dstval, srcval, true, false);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1876,20 +1887,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[dstregndx] &= 0x0ff00;
-                State.A[dstregndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], true, false);
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], true, false);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstregndx] = AddAndSetFlagsWord(dstval, srcval, true, false);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1908,20 +1918,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[dstregndx] &= 0x0ff00;
-                State.A[dstregndx] |= AddAndSetFlagsByte(dstval, Memory.Data[srcndx], true, false);
+                State.A[dstndx] &= 0x0ff00;
+                State.A[dstndx] |= AddAndSetFlagsByte(dstvalw, Memory.Data[srcndx], true, false);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                State.A[dstregndx] = AddAndSetFlagsWord(dstval, srcval, true, false);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                State.A[dstndx] = AddAndSetFlagsWord(dstvalw, srcvalw, true, false);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -1940,40 +1949,40 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int result;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = (operation.OpCodeValue >> 2) & 0x07;
-            ushort srcval = State.A[srcndx];
-            ushort dstval = State.A[dstndx];
+            State.SR &= 0x0fff0;
+
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
+            srcvalw = State.A[srcndx];
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                result = (byte)dstval * (byte)srcval;
+                result = (byte)dstvalw * (byte)srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
                 // o: src bit7, dst bit7, res bit15
-                if (((dstval & byteHiBitMask) | (srcval & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & byteHiBitMask) | (srcvalw & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ byteAllBitsMask) & byteHiBitMask) | ((srcval ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ byteAllBitsMask) & byteHiBitMask) | ((srcvalw ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 State.A[dstndx] = (ushort)result;
             }
             else
             {
-                result = dstval * srcval;
+                result = dstvalw * srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & 0x080000000) == 0x080000000)
                     State.SR |= State.N;
                 // o: src bit15, dst bit15, res bit31
-                if (((dstval & wordHiBitMask) | (srcval & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & wordHiBitMask) | (srcvalw & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ wordAllBitsMask) & wordHiBitMask) | ((srcval ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ wordAllBitsMask) & wordHiBitMask) | ((srcvalw ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 // low res in dest
@@ -1998,39 +2007,39 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int result;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
+            State.SR &= 0x0fff0;
+
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                result = (byte)dstval * (byte)srcval;
+                result = (byte)dstvalw * (byte)srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
                 // o: src bit7, dst bit7, res bit15
-                if (((dstval & byteHiBitMask) | (srcval & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & byteHiBitMask) | (srcvalw & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ byteAllBitsMask) & byteHiBitMask) | ((srcval ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ byteAllBitsMask) & byteHiBitMask) | ((srcvalw ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 State.A[dstndx] = (ushort)result;
             }
             else
             {
-                result = dstval * srcval;
+                result = dstvalw * srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & 0x080000000) == 0x080000000)
                     State.SR |= State.N;
                 // o: src bit15, dst bit15, res bit31
-                if (((dstval & wordHiBitMask) | (srcval & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & wordHiBitMask) | (srcvalw & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ wordAllBitsMask) & wordHiBitMask) | ((srcval ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ wordAllBitsMask) & wordHiBitMask) | ((srcvalw ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 // low res in dest
@@ -2053,43 +2062,42 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int result;
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
+            State.SR &= 0x0fff0;
+
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)dstval * (byte)srcval;
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)dstvalw * (byte)srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
                 // o: src bit7, dst bit7, res bit15
-                if (((dstval & byteHiBitMask) | (srcval & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & byteHiBitMask) | (srcvalw & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ byteAllBitsMask) & byteHiBitMask) | ((srcval ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ byteAllBitsMask) & byteHiBitMask) | ((srcvalw ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 State.A[dstndx] = (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = dstval * srcval;
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = dstvalw * srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & 0x080000000) == 0x080000000)
                     State.SR |= State.N;
                 // o: src bit15, dst bit15, res bit31
-                if (((dstval & wordHiBitMask) | (srcval & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & wordHiBitMask) | (srcvalw & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ wordAllBitsMask) & wordHiBitMask) | ((srcval ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ wordAllBitsMask) & wordHiBitMask) | ((srcvalw ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 // low res in dest
@@ -2112,47 +2120,46 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int result;
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int dstregndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = State.A[dstregndx];
-            ushort srcval;
+            State.SR &= 0x0fff0;
+
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)dstval * (byte)srcval;
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)dstvalw * (byte)srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
                 // o: src bit7, dst bit7, res bit15
-                if (((dstval & byteHiBitMask) | (srcval & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & byteHiBitMask) | (srcvalw & byteHiBitMask) | (ushort)(((result >> 8) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ byteAllBitsMask) & byteHiBitMask) | ((srcval ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ byteAllBitsMask) & byteHiBitMask) | ((srcvalw ^ byteAllBitsMask) & byteHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
-                State.A[dstregndx] = (ushort)result;
+                State.A[dstndx] = (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = dstval * srcval;
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = dstvalw * srcvalw;
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & 0x080000000) == 0x080000000)
                     State.SR |= State.N;
                 // o: src bit15, dst bit15, res bit31
-                if (((dstval & wordHiBitMask) | (srcval & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
+                if (((dstvalw & wordHiBitMask) | (srcvalw & wordHiBitMask) | (ushort)(((result >> 16) ^ wordAllBitsMask) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
-                else if ((((dstval ^ wordAllBitsMask) & wordHiBitMask) | ((srcval ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
+                else if ((((dstvalw ^ wordAllBitsMask) & wordHiBitMask) | ((srcvalw ^ wordAllBitsMask) & wordHiBitMask) | (ushort)((result >> 16) & wordHiBitMask)) == 0)
                     State.SR |= State.O;
 
                 // low res in dest
-                State.A[dstregndx] = (ushort)result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2171,7 +2178,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << ((operation.OpCodeValue >> 2) & 0x0f)));
+            result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << ((operation.OpCodeValue >> 2) & 0x0f)));
             State.SR &= (byte)(State.Z ^ byteAllBitsMask);
             if (result == 0)
                 State.SR |= State.Z;
@@ -2192,7 +2199,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << State.A[(operation.OpCodeValue >> 2) & 0x07]));
+            result = (ushort)(State.A[(operation.OpCodeValue >> 6) & 0x07] & (1 << State.A[(operation.OpCodeValue >> 2) & 0x07]));
             State.SR &= (byte)(State.Z ^ byteAllBitsMask);
             if (result == 0)
                 State.SR |= State.Z;
@@ -2285,17 +2292,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval;
+            dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 Memory.Data[dstndx] = AddAndSetFlagsByte(Memory.Data[dstndx], 1, false, true);
             }
             else
             {
-                dstval = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx] << 8 | Memory.Data[dstndx + 1]), 1, false, true);
-                Memory.Data[dstndx++] = (byte)(dstval >> 8);
-                Memory.Data[dstndx] = (byte)dstval;
+                dstvalw = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx] << 8 | Memory.Data[dstndx + 1]), 1, false, true);
+                Memory.Data[dstndx++] = (byte)(dstvalw >> 8);
+                Memory.Data[dstndx] = (byte)dstvalw;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2314,17 +2320,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval;
+            dstndx = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 Memory.Data[dstndx] = AddAndSetFlagsByte(Memory.Data[dstndx], 1, false, false);
             }
             else
             {
-                dstval = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx] << 8 | Memory.Data[dstndx + 1]), 1, false, false);
-                Memory.Data[dstndx++] = (byte)(dstval >> 8);
-                Memory.Data[dstndx] = (byte)dstval;
+                dstvalw = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx] << 8 | Memory.Data[dstndx + 1]), 1, false, false);
+                Memory.Data[dstndx++] = (byte)(dstvalw >> 8);
+                Memory.Data[dstndx] = (byte)dstvalw;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2343,8 +2348,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort result;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 result = AddAndSetFlagsByte(State.A[dstndx], 1, false, false);
@@ -2354,7 +2359,7 @@ namespace LionComputerEmulator
             else
             {
                 result = AddAndSetFlagsWord(State.A[dstndx], 1, false, false);
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2373,8 +2378,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort result;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 result = AddAndSetFlagsByte(State.A[dstndx], 1, false, true);
@@ -2384,7 +2389,7 @@ namespace LionComputerEmulator
             else
             {
                 result = AddAndSetFlagsWord(State.A[dstndx], 1, false, true);
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2403,11 +2408,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval & srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw & srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2425,7 +2430,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2444,11 +2449,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval & srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw & srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2466,7 +2471,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2485,16 +2490,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval & srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw & srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2502,19 +2506,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval & srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw & srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2533,16 +2537,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval & srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw & srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2550,19 +2553,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval & srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw & srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2581,11 +2584,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval | srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw | srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2603,7 +2606,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2622,11 +2625,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval | srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw | srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2644,7 +2647,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2663,16 +2666,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval | srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw | srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2680,19 +2682,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval | srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw | srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2711,16 +2713,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval | srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw | srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2728,19 +2729,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval | srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw | srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2759,11 +2760,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval ^ srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw ^ srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2781,7 +2782,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2800,11 +2801,11 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort dstval = State.A[dstndx];
-            ushort result = (ushort)(dstval ^ srcval);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            dstvalw = State.A[dstndx];
+            result = (ushort)(dstvalw ^ srcvalw);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2822,7 +2823,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2841,16 +2842,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval ^ srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw ^ srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2858,19 +2858,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval ^ srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw ^ srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2889,16 +2889,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort dstval = State.A[dstndx];
-            ushort srcval;
-            ushort result;
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            dstvalw = State.A[dstndx];
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = (byte)(dstval ^ srcval);
+                srcvalw = Memory.Data[srcndx];
+                result = (byte)(dstvalw ^ srcvalw);
 
                 if ((result & byteAllBitsMask) == 0)
                     State.SR |= State.Z;
@@ -2906,19 +2905,19 @@ namespace LionComputerEmulator
                     State.SR |= State.N;
 
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = (ushort)(dstval ^ srcval);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = (ushort)(dstvalw ^ srcvalw);
 
                 if ((result & wordAllBitsMask) == 0)
                     State.SR |= State.Z;
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2937,9 +2936,9 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= 0x0f0;
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort result = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
+            State.SR &= 0x0fff0;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            result = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
             if ((operation.OpCodeValue & bwb) != 0)
             {
                 if ((result & byteAllBitsMask) == 0)
@@ -2957,7 +2956,7 @@ namespace LionComputerEmulator
                 else if ((result & wordHiBitMask) == wordHiBitMask)
                     State.SR |= State.N;
 
-                State.A[dstndx] = result;
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -2976,19 +2975,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort dstval = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
-            ushort result;
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = (ushort)(State.A[dstndx] ^ wordAllBitsMask);
+
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                result = AddAndSetFlagsByte(dstval, 1, false, false);
+                result = AddAndSetFlagsByte(dstvalw, 1, false, false);
                 State.A[dstndx] &= 0x0ff00;
-                State.A[dstndx] |= result;
+                State.A[dstndx] |= (ushort)result;
             }
             else
             {
-                result = AddAndSetFlagsWord(dstval, 1, false, false);
-                State.A[dstndx] = result;
+                result = AddAndSetFlagsWord(dstvalw, 1, false, false);
+                State.A[dstndx] = (ushort)result;
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3007,21 +3006,21 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
 
-            uint bigrol = (uint)(((_dstword << 16) | _dstword) << _srcword);
-            ushort result = (ushort)(bigrol >> 16);
+            uint bigrol = (uint)(((dstvalw << 16) | dstvalw) << srcvalw);
+            result = (ushort)(bigrol >> 16);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
             if ((result & wordAllBitsMask) == 0)
                 State.SR |= State.Z;
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-            State.A[dstndx] = result;
+            State.A[dstndx] = (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3039,25 +3038,25 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword >> _srcword);
+            result = (ushort)(dstvalw >> srcvalw);
 
-            if ((_dstword & wordHiBitMask) != 0)
-                result = (ushort)(result | ((wordAllBitsMask & ((1 << (16 - _srcword)) - 1)) ^ wordAllBitsMask));
+            if ((dstvalw & wordHiBitMask) != 0)
+                result = (ushort)(result | ((wordAllBitsMask & ((1 << (16 - srcvalw)) - 1)) ^ wordAllBitsMask));
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (_srcword - 1))) != 0)
+            if ((dstvalw & (1 << (srcvalw - 1))) != 0)
                 State.SR |= State.C;
             if ((result & wordAllBitsMask) == 0)
                 State.SR |= State.Z;
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-            State.A[dstndx] = result;
+            State.A[dstndx] = (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3075,22 +3074,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword << _srcword);
+            result = (ushort)(dstvalw << srcvalw);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (16 - _srcword))) != 0)
+            if ((dstvalw & (1 << (16 - srcvalw))) != 0)
                 State.SR |= State.C;
             if ((result & wordAllBitsMask) == 0)
                 State.SR |= State.Z;
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-            State.A[dstndx] = result;
+            State.A[dstndx] = (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3108,22 +3107,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword >> _srcword);
+            result = (ushort)(dstvalw >> srcvalw);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (_srcword - 1))) != 0)
+            if ((dstvalw & (1 << (srcvalw - 1))) != 0)
                 State.SR |= State.C;
             if ((result & wordAllBitsMask) == 0)
                 State.SR |= State.Z;
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-            State.A[dstndx] = result;
+            State.A[dstndx] = (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3141,20 +3140,20 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = (operation.OpCodeValue >> 2) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = State.A[srcndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = State.A[srcndx];
 
-            uint result = (uint)(((_dstword << 16) + _srcword) >> 1);
+            resultlong = ((dstvalw << 16) + srcvalw) >> 1;
 
-            State.SR &= 0x0f0;
-            State.A[dstndx] = (ushort)(result >> 16);
-            State.A[srcndx] = (ushort)(result & 0x0000FFFF);
+            State.SR &= 0x0fff0;
+            State.A[dstndx] = (ushort)(resultlong >> 16);
+            State.A[srcndx] = (ushort)(resultlong & 0x0000FFFF);
 
-            if ((_srcword & 1) != 0)
+            if ((srcvalw & 1) != 0)
                 State.SR |= State.C;
-            if ((result) == 0)
+            if ((resultlong) == 0)
                 State.SR |= State.Z;
             else if ((State.A[dstndx] & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
@@ -3176,15 +3175,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            byte _dstword = (byte)State.A[dstndx];
-            byte _srcword = (byte)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalb = (byte)State.A[dstndx];
+            srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword >> _srcword);
+            result = (ushort)(dstvalb >> srcvalb);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (_srcword - 1))) != 0)
+            if ((dstvalb & (1 << (srcvalb - 1))) != 0)
                 State.SR |= State.C;
             if ((result & byteAllBitsMask) == 0)
                 State.SR |= State.Z;
@@ -3192,7 +3191,7 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= result;
+            State.A[dstndx] |= (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3210,22 +3209,22 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = (ushort)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword << _srcword);
+            result = (ushort)(dstvalw << srcvalw);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (16 - _srcword))) != 0)
+            if ((dstvalw & (1 << (16 - srcvalw))) != 0)
                 State.SR |= State.C;
             if ((result & wordAllBitsMask) == 0)
                 State.SR |= State.Z;
             else if ((result & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
 
-            State.A[dstndx] = result;
+            State.A[dstndx] = (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3243,20 +3242,20 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            int srcndx = (operation.OpCodeValue >> 2) & 0x07;
-            ushort _dstword = State.A[dstndx];
-            ushort _srcword = State.A[srcndx];
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
+            dstvalw = State.A[dstndx];
+            srcvalw = State.A[srcndx];
 
-            uint result = (uint)(((_dstword << 16) + _srcword) << 1);
+            resultlong = ((dstvalw << 16) + srcvalw) << 1;
 
-            State.SR &= 0x0f0;
-            State.A[dstndx] = (ushort)(result >> 16);
-            State.A[srcndx] = (ushort)(result & 0x0000FFFF);
+            State.SR &= 0x0fff0;
+            State.A[dstndx] = (ushort)(resultlong >> 16);
+            State.A[srcndx] = (ushort)(resultlong & 0x0000FFFF);
 
-            if ((_dstword & (1 << (16 - 1))) != 0)
+            if ((dstvalw & (1 << (16 - 1))) != 0)
                 State.SR |= State.C;
-            if ((result) == 0)
+            if ((resultlong) == 0)
                 State.SR |= State.Z;
             else if ((State.A[dstndx] & wordHiBitMask) == wordHiBitMask)
                 State.SR |= State.N;
@@ -3278,15 +3277,15 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-            byte _dstword = (byte)State.A[dstndx];
-            byte _srcword = (byte)((operation.OpCodeValue >> 2) & 0x0f);
+            dstndx = (operation.OpCodeValue >> 6) & 0x07;
+            dstvalb = (byte)State.A[dstndx];
+            srcvalb = (byte)((operation.OpCodeValue >> 2) & 0x0f);
 
-            ushort result = (ushort)(_dstword << _srcword);
+            result = (ushort)(dstvalb << srcvalb);
 
-            State.SR &= 0x0f0;
+            State.SR &= 0x0fff0;
 
-            if ((_dstword & (1 << (8 - _srcword))) != 0)
+            if ((dstvalb & (1 << (8 - srcvalb))) != 0)
                 State.SR |= State.C;
             if ((result & byteAllBitsMask) == 0)
                 State.SR |= State.Z;
@@ -3294,7 +3293,7 @@ namespace LionComputerEmulator
                 State.SR |= State.N;
 
             State.A[dstndx] &= 0x0ff00;
-            State.A[dstndx] |= result;
+            State.A[dstndx] |= (ushort)result;
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3304,25 +3303,7 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
-        /// Set Status Register Bit
-        /// </summary>
-        public static void SrSet(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            State.SR |= (byte)(1 << ((operation.OpCodeValue >> 2) & 0x07));
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        /// <summary>
-        /// Clear Status Register Bit
+        /// Clear Status Register Bit (bwb=1: Set)
         /// </summary>
         public static void SrClr(Operation operation)
         {
@@ -3330,7 +3311,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            State.SR &= (byte)((1 << ((operation.OpCodeValue >> 2) & 0x07)) ^ 0x0ff);
+            if ((operation.OpCodeValue & bwb) == 0)
+            {
+
+                State.SR &= (byte)((1 << ((operation.OpCodeValue >> 2) & 0x07)) ^ 0x0ff);
+            }
+            else
+            {
+                State.SR |= (byte)(1 << (operation.OpCodeValue >> 2) & 0x07);
+            }
+
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3352,8 +3342,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort result;
+            dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -3380,8 +3369,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort result;
+            dstndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -3408,17 +3396,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort result;
+            dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                result = AddAndSetFlagsByte(dstval, srcval, false, true);
+                result = AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                result = AddAndSetFlagsWord(dstval, srcval, false, true);
+                result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3437,17 +3424,16 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            //ushort srcval = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
-            ushort result;
+            dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            //srcvalw = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                result = AddAndSetFlagsByte(dstval, Memory.Data[State.PC + 3], false, true);
+                result = AddAndSetFlagsByte(dstvalw, Memory.Data[State.PC + 3], false, true);
             }
             else
             {
-                result = AddAndSetFlagsWord(dstval, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
+                result = AddAndSetFlagsWord(dstvalw, (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3466,20 +3452,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort srcval;
-            ushort result;
+            dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = AddAndSetFlagsByte(dstval, srcval, false, true);
+                srcvalw = Memory.Data[srcndx];
+                result = AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = AddAndSetFlagsWord(dstval, srcval, false, true);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3498,20 +3482,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort dstval = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            ushort srcval;
-            ushort result;
+            dstvalw = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                srcval = Memory.Data[srcndx];
-                result = AddAndSetFlagsByte(dstval, srcval, false, true);
+                srcvalw = Memory.Data[srcndx];
+                result = AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                srcval = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
-                result = AddAndSetFlagsWord(dstval, srcval, false, true);
+                srcvalw = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
+                result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3530,20 +3512,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            ushort srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort dstval;
-            ushort result;
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                dstval = Memory.Data[dstndx];
-                result = AddAndSetFlagsByte(dstval, srcval, false, true);
+                dstvalw = Memory.Data[dstndx];
+                result = AddAndSetFlagsByte(dstvalw, srcvalw, false, true);
             }
             else
             {
-                dstval = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
-                result = AddAndSetFlagsWord(dstval, srcval, false, true);
+                dstvalw = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
+                result = AddAndSetFlagsWord(dstvalw, srcvalw, false, true);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -3562,8 +3542,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            ushort result;
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -3571,7 +3550,7 @@ namespace LionComputerEmulator
             }
             else
             {
-                //dstval = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
+                //dstvalw = (ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]);
                 result = AddAndSetFlagsWord((ushort)(Memory.Data[dstndx++] << 8 | Memory.Data[dstndx]), (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]), false, true);
             }
 #if DEBUG
@@ -3591,9 +3570,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort result;
+            dstndx = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
             if ((operation.OpCodeValue & bwb) != 0)
             {
@@ -3620,7 +3598,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort result = AddAndSetFlagsByte(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
+            result = AddAndSetFlagsByte(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3638,7 +3616,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            ushort result = AddAndSetFlagsWord(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
+            result = AddAndSetFlagsWord(State.A[(operation.OpCodeValue >> 6) & 0x07], (ushort)((operation.OpCodeValue >> 2) & 0x0f), false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3650,15 +3628,16 @@ namespace LionComputerEmulator
         /// <summary>
         /// Compare Register Low Byte to Register High Byte
         /// </summary>
-        public static void CmphlRegDirRegDir(Operation operation)
+        public static void CmphRegDirRegDir(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte dstval = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
-            byte srcval = (byte)State.A[(operation.OpCodeValue >> 2) & 0x07];
-            ushort result = AddAndSetFlagsByte(dstval, srcval, false, true);
+            dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
+            srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07]);
+            //srcvalb = (byte)(State.A[(operation.OpCodeValue >> 2) & 0x07] >> 8);
+            result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3670,15 +3649,16 @@ namespace LionComputerEmulator
         /// <summary>
         /// Compare Immediate Low Byte to Register High Byte
         /// </summary>
-        public static void CmphlRegDirImd(Operation operation)
+        public static void CmphRegDirImd(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte dstval = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
-            byte srcval = Memory.Data[State.PC + 3];
-            ushort result = AddAndSetFlagsByte(dstval, srcval, false, true);
+            dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
+            srcvalb = Memory.Data[State.PC];
+            //srcvalb = Memory.Data[State.PC + 2];
+            result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3690,15 +3670,16 @@ namespace LionComputerEmulator
         /// <summary>
         /// Compare Register Reference Low Byte to Register High Byte
         /// </summary>
-        public static void CmphlRegDirRegRef(Operation operation)
+        public static void CmphRegDirRegRef(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte dstval = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
-            byte srcval = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
-            ushort result = AddAndSetFlagsByte(dstval, srcval, false, true);
+            dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
+            srcvalb = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
+            //srcvalb = Memory.Data[(State.A[(operation.OpCodeValue >> 2) & 0x07]) - 1];
+            result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3710,16 +3691,17 @@ namespace LionComputerEmulator
         /// <summary>
         /// Compare Memory Reference Low Byte to Register High Byte
         /// </summary>
-        public static void CmphlRegDirMemRef(Operation operation)
+        public static void CmphRegDirMemRef(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            byte dstval = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
-            int srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            byte srcval = Memory.Data[srcndx];
-            ushort result = AddAndSetFlagsByte(dstval, srcval, false, true);
+            dstvalb = (byte)(State.A[(operation.OpCodeValue >> 6) & 0x07] >> 8);
+            srcndx = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            srcvalb = Memory.Data[srcndx];
+            //srcvalb = Memory.Data[srcndx - 1];
+            result = AddAndSetFlagsByte(dstvalb, srcvalb, false, true);
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -3793,7 +3775,7 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -3819,8 +3801,8 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -3845,19 +3827,19 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
                 State.PC = State.A[(operation.OpCodeValue >> 2) & 0x07];
             }
             else
@@ -3883,19 +3865,19 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
                 State.PC = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
             }
             else
@@ -3921,20 +3903,20 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -3960,21 +3942,21 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4050,7 +4032,7 @@ namespace LionComputerEmulator
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4076,8 +4058,8 @@ namespace LionComputerEmulator
             // c=0 or z=1
             if ((State.SR & State.C) == 0 || (State.SR & State.Z) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4123,7 +4105,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
         }
 
@@ -4136,8 +4118,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
         }
 
         /// <summary>
@@ -4199,7 +4181,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4224,8 +4206,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4297,7 +4279,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4322,8 +4304,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.O) == ((operation.OpCodeValue & bwb) >> 4))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4395,7 +4377,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4410,7 +4392,7 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
-        /// Jump on not Carry to Memory
+        /// Jump on Carry or not Carry to Memory (bwb=0:JNC, bwb=1:JC)
         /// </summary>
         public static void JncMemRef(Operation operation)
         {
@@ -4420,8 +4402,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.C) == ((operation.OpCodeValue & bwb) >> 5))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4493,7 +4475,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4518,8 +4500,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.N) == ((operation.OpCodeValue & bwb) >> 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4594,7 +4576,7 @@ namespace LionComputerEmulator
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4620,8 +4602,8 @@ namespace LionComputerEmulator
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4696,7 +4678,7 @@ namespace LionComputerEmulator
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4722,8 +4704,8 @@ namespace LionComputerEmulator
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4798,7 +4780,7 @@ namespace LionComputerEmulator
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4824,8 +4806,8 @@ namespace LionComputerEmulator
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -4874,7 +4856,7 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             PushToStack((ushort)(State.PC + operation.Length));
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
         }
 
@@ -4888,8 +4870,8 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             PushToStack((ushort)(State.PC + operation.Length));
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
         }
 
         /// <summary>
@@ -4954,7 +4936,7 @@ namespace LionComputerEmulator
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -4980,8 +4962,8 @@ namespace LionComputerEmulator
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -5056,7 +5038,7 @@ namespace LionComputerEmulator
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -5082,8 +5064,8 @@ namespace LionComputerEmulator
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -5158,7 +5140,7 @@ namespace LionComputerEmulator
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]);
             }
             else
@@ -5184,8 +5166,8 @@ namespace LionComputerEmulator
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(Memory.Data[val++] << 8 | Memory.Data[val]);
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(Memory.Data[valuew++] << 8 | Memory.Data[valuew]);
             }
             else
             {
@@ -5208,7 +5190,7 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             // load vector
-            int dstndx = (operation.OpCodeValue >> 2) & 0x0f;
+            dstndx = (operation.OpCodeValue >> 2) & 0x0f;
             // treat spi-disk interrupt and functions
             Interrupt intfunction = (Interrupt)State.A[0];
             if (intfunction >= Interrupt.SPI_INIT && intfunction <= Interrupt.WRITESEC && (Interrupt)dstndx == Interrupt.INT_SPI)
@@ -5277,7 +5259,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
         }
 
@@ -5290,106 +5272,8 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
-        }
-
-        /// <summary>
-        /// Relative Jump on Zero to Register Value
-        /// </summary>
-        public static void JrzRegDir(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            if ((State.SR & State.Z) != 0)
-            {
-                State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
-            }
-            else
-            {
-                //WaitForCycles(operation.Cycles);
-                State.PC += operation.Length;
-            }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-        }
-
-        /// <summary>
-        /// Relative Jump on Zero to Immediate Value
-        /// </summary>
-        public static void JrzImd(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            if ((State.SR & State.Z) != 0)
-            {
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
-            }
-            else
-            {
-                //WaitForCycles(operation.Cycles);
-                State.PC += operation.Length;
-            }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-        }
-
-        /// <summary>
-        /// Relative Jump on Zero to Register Reference
-        /// </summary>
-        public static void JrzRegRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            if ((State.SR & State.Z) != 0)
-            {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
-            }
-            else
-            {
-                //WaitForCycles(operation.Cycles);
-                State.PC += operation.Length;
-            }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-        }
-
-        /// <summary>
-        /// Relative Jump on Zero to Memory
-        /// </summary>
-        public static void JrzMemRef(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            if ((State.SR & State.Z) != 0)
-            {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
-            }
-            else
-            {
-                //WaitForCycles(operation.Cycles);
-                State.PC += operation.Length;
-            }
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
         }
 
         /// <summary>
@@ -5401,7 +5285,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            if ((State.SR & State.Z) == 0)
+            if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
             }
@@ -5425,7 +5309,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            if ((State.SR & State.Z) == 0)
+            if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
             }
@@ -5449,9 +5333,9 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            if ((State.SR & State.Z) == 0)
+            if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -5474,10 +5358,10 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            if ((State.SR & State.Z) == 0)
+            if ((State.SR & State.Z) == ((operation.OpCodeValue & bwb) >> 3))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -5552,7 +5436,7 @@ namespace LionComputerEmulator
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -5578,8 +5462,8 @@ namespace LionComputerEmulator
             // 	c = 0 and z = 0
             if ((State.SR & State.C) == 0 && (State.SR & State.Z) == 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -5651,7 +5535,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.N) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -5676,8 +5560,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.N) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -5749,7 +5633,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.O) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -5774,8 +5658,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.O) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -5847,7 +5731,7 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.C) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -5872,8 +5756,8 @@ namespace LionComputerEmulator
 #endif
             if ((State.SR & State.C) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -5922,7 +5806,7 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             PushToStack((ushort)(State.PC + operation.Length));
-            int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
             State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
         }
 
@@ -5936,8 +5820,8 @@ namespace LionComputerEmulator
             Disassembler.Monitor(State.PC);
 #endif
             PushToStack((ushort)(State.PC + operation.Length));
-            int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+            valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+            State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;
@@ -6006,7 +5890,7 @@ namespace LionComputerEmulator
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6032,8 +5916,8 @@ namespace LionComputerEmulator
             // c=1 or z=1 
             if (((State.SR & State.C) | (State.SR & State.Z)) != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6108,7 +5992,7 @@ namespace LionComputerEmulator
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6134,8 +6018,8 @@ namespace LionComputerEmulator
             // z=1 or n<>o
             if (((State.SR & State.Z) != 0) || (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6210,7 +6094,7 @@ namespace LionComputerEmulator
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6236,8 +6120,8 @@ namespace LionComputerEmulator
             // z=0 and n<>o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) != ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6311,7 +6195,7 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6337,8 +6221,8 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6363,19 +6247,19 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
                 State.PC = (ushort)(State.PC + operation.Length + State.A[(operation.OpCodeValue >> 2) & 0x07]);
             }
             else
@@ -6401,19 +6285,19 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]));
             }
             else
@@ -6439,20 +6323,20 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6478,21 +6362,21 @@ namespace LionComputerEmulator
 #endif
             if (State.X != 0)
             {
-                int dstndx = (operation.OpCodeValue >> 6) & 0x07;
-                ushort dstval = State.A[dstndx];
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                dstvalw = State.A[dstndx];
                 if ((operation.OpCodeValue & bwb) == 0)
                     if ((State.SR & State.D) == 0)
-                        dstval += 2;
+                        dstvalw += 2;
                     else
-                        dstval -= 2;
+                        dstvalw -= 2;
                 else
                     if ((State.SR & State.D) == 0)
-                    dstval += 1;
+                    dstvalw += 1;
                 else
-                    dstval -= 1;
-                State.A[dstndx] = dstval;
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                    dstvalw -= 1;
+                State.A[dstndx] = dstvalw;
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6568,7 +6452,7 @@ namespace LionComputerEmulator
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6594,8 +6478,8 @@ namespace LionComputerEmulator
             //z=0 and n=o
             if ((State.SR & State.Z) == 0 && (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6670,7 +6554,7 @@ namespace LionComputerEmulator
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
+                srcndx = State.A[(operation.OpCodeValue >> 2) & 0x07];
                 State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[srcndx++] << 8 | Memory.Data[srcndx]));
             }
             else
@@ -6696,8 +6580,8 @@ namespace LionComputerEmulator
             //z=1 or n=o
             if ((State.SR & State.Z) == 1 || (State.SR & State.N) == ((State.SR & State.O) << 2))
             {
-                int val = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[val++] << 8 | Memory.Data[val]));
+                valuew = (ushort)(Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]);
+                State.PC = (ushort)(State.PC + operation.Length + (Memory.Data[valuew++] << 8 | Memory.Data[valuew]));
             }
             else
             {
@@ -6719,18 +6603,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            int ndx = (operation.OpCodeValue >> 2) & 0x07;
+            portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
                 portnum &= -2;
-                Display.Ram[portnum++] = (byte)(State.A[ndx] >> 8);
-                Display.Ram[portnum] = (byte)State.A[ndx];
+                Display.Ram[portnum++] = (byte)(State.A[srcndx] >> 8);
+                Display.Ram[portnum] = (byte)State.A[srcndx];
             }
             else
             {
-                Device.Port[portnum] = State.A[ndx];
+                Device.Port[portnum] = State.A[srcndx];
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -6746,7 +6630,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
@@ -6770,18 +6654,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
-            int srcval = State.A[(operation.OpCodeValue >> 2) & 0x07];
+            portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            srcvalw = State.A[(operation.OpCodeValue >> 2) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
                 portnum &= -2;
-                Display.Ram[portnum++] = Memory.Data[srcval++];
-                Display.Ram[portnum] = Memory.Data[srcval];
+                Display.Ram[portnum++] = Memory.Data[srcvalw++];
+                Display.Ram[portnum] = Memory.Data[srcvalw];
             }
             else
             {
-                Device.Port[portnum] = (ushort)(Memory.Data[srcval++] << 8 | Memory.Data[srcval]);
+                Device.Port[portnum] = (ushort)(Memory.Data[srcvalw++] << 8 | Memory.Data[srcvalw]);
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -6797,7 +6681,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
@@ -6823,7 +6707,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
+            portnum = State.A[(operation.OpCodeValue >> 6) & 0x07];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
@@ -6847,7 +6731,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
@@ -6873,18 +6757,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-            int ndx = (operation.OpCodeValue >> 2) & 0x07;
+            portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            srcndx = (operation.OpCodeValue >> 2) & 0x07;
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
                 portnum &= -2;
-                Display.Ram[portnum++] = (byte)(State.A[ndx] >> 8);
-                Display.Ram[portnum] = (byte)State.A[ndx];
+                Display.Ram[portnum++] = (byte)(State.A[srcndx] >> 8);
+                Display.Ram[portnum] = (byte)State.A[srcndx];
             }
             else
             {
-                Device.Port[portnum] = State.A[ndx];
+                Device.Port[portnum] = State.A[srcndx];
             }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
@@ -6900,7 +6784,7 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
+            portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
 
             if (portnum >= Device.MAX_DEVICE_PORTS)
             {
@@ -6924,19 +6808,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = State.A[(operation.OpCodeValue >> 2) & 0x07];
-
+            portnum = State.A[(operation.OpCodeValue >> 2) & 0x07];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[(operation.OpCodeValue >> 6) & 0x07] &= 0x0ff00;
-
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                State.A[dstndx] &= 0x0ff00;
                 if (portnum >= Device.MAX_DEVICE_PORTS)
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Display.Ram[portnum];
+                    State.A[dstndx] |= Display.Ram[portnum];
                 }
                 else
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Device.Port[portnum];
+                    State.A[dstndx] |= Device.Port[portnum];
                 }
             }
             else
@@ -6965,19 +6848,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
-
+            portnum = Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[(operation.OpCodeValue >> 6) & 0x07] &= 0x0ff00;
-
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                State.A[dstndx] &= 0x0ff00;
                 if (portnum >= Device.MAX_DEVICE_PORTS)
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Display.Ram[portnum];
+                    State.A[dstndx] |= Display.Ram[portnum];
                 }
                 else
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Device.Port[portnum];
+                    State.A[dstndx] |= Device.Port[portnum];
                 }
             }
             else
@@ -7006,19 +6888,18 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
-
+            portnum = Memory.Data[State.A[(operation.OpCodeValue >> 2) & 0x07]];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[(operation.OpCodeValue >> 6) & 0x07] &= 0x0ff00;
-
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                State.A[dstndx] &= 0x0ff00;
                 if (portnum >= Device.MAX_DEVICE_PORTS)
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Display.Ram[portnum];
+                    State.A[dstndx] |= Display.Ram[portnum];
                 }
                 else
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Device.Port[portnum];
+                    State.A[dstndx] |= Device.Port[portnum];
                 }
             }
             else
@@ -7047,19 +6928,19 @@ namespace LionComputerEmulator
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            int portnum = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
-
+            portnum = Memory.Data[Memory.Data[State.PC + 2] << 8 | Memory.Data[State.PC + 3]];
             if ((operation.OpCodeValue & bwb) != 0)
             {
-                State.A[(operation.OpCodeValue >> 6) & 0x07] &= 0x0ff00;
+                dstndx = (operation.OpCodeValue >> 6) & 0x07;
+                State.A[dstndx] &= 0x0ff00;
 
                 if (portnum >= Device.MAX_DEVICE_PORTS)
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Display.Ram[portnum];
+                    State.A[dstndx] |= Display.Ram[portnum];
                 }
                 else
                 {
-                    State.A[(operation.OpCodeValue >> 6) & 0x07] |= Device.Port[portnum];
+                    State.A[dstndx] |= Device.Port[portnum];
                 }
             }
             else
@@ -7179,24 +7060,6 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
-        /// Push X to Stack
-        /// </summary>
-        public static void PushX(Operation operation)
-        {
-#if DEBUG
-            Disassembler.doMonitor = true;
-            Disassembler.Monitor(State.PC);
-#endif
-            PushToStack(State.X);
-#if DEBUG
-            Disassembler.Monitor(State.PC, true);
-            Disassembler.doMonitor = false;
-#endif
-            //WaitForCycles(operation.Cycles);
-            State.PC += operation.Length;
-        }
-
-        /// <summary>
         /// Pop Status Register from Stack
         /// </summary>
         public static void PopSr(Operation operation)
@@ -7215,15 +7078,22 @@ namespace LionComputerEmulator
         }
 
         /// <summary>
-        /// Push Status Register to Stack
+        /// Push to Stack bwb=1:Status Register, bwb=0:X
         /// </summary>
-        public static void PushSr(Operation operation)
+        public static void PushSrX(Operation operation)
         {
 #if DEBUG
             Disassembler.doMonitor = true;
             Disassembler.Monitor(State.PC);
 #endif
-            PushToStack(State.SR);
+            if ((operation.OpCodeValue & bwb) != 0)
+            {
+                PushToStack(State.SR);
+            }
+            else
+            {
+                PushToStack(State.X);
+            }
 #if DEBUG
             Disassembler.Monitor(State.PC, true);
             Disassembler.doMonitor = false;

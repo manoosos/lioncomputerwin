@@ -379,7 +379,7 @@ PC: {2}";
                             State.A[_andx++] = (ushort)(_state[_bytndx++] << 8 | _state[_bytndx++]);
                             State.PC = (ushort)(_state[_bytndx++] << 8 | _state[_bytndx++]);
                             State.SP = (ushort)(_state[_bytndx++] << 8 | _state[_bytndx++]);
-                            State.SR = _state[_bytndx++];
+                            State.SR = (ushort)(_state[_bytndx++] << 8 | _state[_bytndx++]);
                             State.X = (ushort)(_state[_bytndx++] << 8 | _state[_bytndx++]);
                         }
                         else
@@ -690,7 +690,8 @@ PC: {2}";
                 (byte)State.PC,
                 (byte)(State.SP>>8),
                 (byte)State.SP,
-                State.SR,
+                (byte)(State.SR>>8),
+                (byte)State.SR,
                 (byte)(State.X>>8),
                 (byte)State.X
             };
@@ -822,6 +823,7 @@ PC: {2}";
                 settings.VHDImagePath = fname;
                 settings.Save();
                 CheckDiskImageWritable();
+                Cpu.Reset();
             }
             finally
             {

@@ -512,7 +512,7 @@ SVD1:	MOV	A4,A3
 	CMPI	A0,0     ; Is it full
 	JZ	SVDE
 
-	CMPHL A0,A4    ; same fat offset
+	CMPH A0,A4    ; same fat offset
 	JZ	NORELD
 
 	PUSH	A0
@@ -1557,7 +1557,7 @@ PSTR2:	PUSH 		A1
 		INT		4
 		POP		A1
 		ADD		A2,$0100
-		CMPHL		A2,XCC
+		CMPH		A2,XCC
 		JB		PSTR3
 		INC		A2
 		AND		A2,$00FF
@@ -1581,7 +1581,7 @@ PSTR12:	PUSH 		A1
 		INT		4
 		POP		A1
 		ADD		A2,$0100
-		CMPHL		A2,XCC2
+		CMPH		A2,XCC2
 		JB		PSTR13
 		INC		A2
 		AND		A2,$00FF

@@ -31,14 +31,29 @@
         public const byte D = 0x010;
 
         /// <summary>
-        /// SR Trace Flag
+        /// SR TRAP Interrupt 15 on-1/off-0
         /// </summary>
         public const byte T = 0x020;
 
         /// <summary>
         /// SR Global Interrupts
         /// </summary>
-        public const byte I = 0x80;
+        public const byte I = 0x40;
+
+        /// <summary>
+        /// SR Stack Ram Page Mask
+        /// </summary>
+        public const ushort StackPageMask = 0x0380;
+
+        /// <summary>
+        /// SR Data Ram Page Mask
+        /// </summary>
+        public const ushort DataPageMask = 0x01C00;
+
+        /// <summary>
+        /// SR Code Ram Page Mask
+        /// </summary>
+        public const ushort CodePageMask = 0x0E000;
 
         /// <summary>
         /// Memory Register Array
@@ -50,10 +65,26 @@
         /// </summary>
         public static ushort X = 0;
 
+
+/*
+SR register bits:
+(as with all registers, SR(0) is the rightmost less significant bit )
+SR(0) = Carry flag
+SR(1) = Overflow flag
+SR(2) = Zero flag
+SR(3) = Negative flag
+SR(4) = JXA increase or decrease register
+SR(5) = TRAP Interrupt 15 on/off (off=0 the default value)
+SR(6) = Interrupt disable (default disabled)
+SR(7..9)   Current StackPage
+SR(10..12) Current Data Page
+SR(13..15) Current Code Page
+* */
+
         /// <summary>
         /// Status Register
         /// </summary>
-        public static byte SR = 0; //  I ? T D Z N O C
+        public static ushort SR = 0; // CPG DPG SPG I T D Z N O C
 
         /// <summary>
         /// Stack Pointer
